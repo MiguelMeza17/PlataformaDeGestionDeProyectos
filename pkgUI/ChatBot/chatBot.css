@@ -1,0 +1,104 @@
+.esdeath-zona {
+    position: fixed !important;
+    /* MODIFICA ESTE VALOR PARA SUBIR O BAJAR TODO EL COMPONENTE */
+    bottom: 0px !important; 
+    right: 0 !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    z-index: 999999 !important;
+}
+
+.pestana-luz {
+    width: 6px !important;
+    height: 180px !important;
+    background: #228be6 !important;
+    border-radius: 4px 0 0 4px !important;
+    box-shadow: 0 0 15px #228be6, 0 0 30px #228be6 !important;
+    transition: background 0.3s, box-shadow 0.3s !important;
+    cursor: pointer !important;
+    margin-bottom: 40px !important;
+}
+
+.esdeath-zona:hover .pestana-luz {
+    background: #a5d8ff !important;
+    box-shadow: 0 0 20px #a5d8ff, 0 0 40px #a5d8ff !important;
+}
+
+.esdeath-chat {
+    width: 190px !important;
+    margin-right: 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(20px) !important;
+    transition: opacity 0.5s ease, visibility 0.5s ease, transform 0.5s ease !important;
+
+    margin-bottom: 0px !important;
+}
+
+.esdeath-chat.mostrar {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+}
+
+.esdeath-chat img {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    filter: drop-shadow(0 0 15px rgba(34, 139, 230, 0.4)) !important;
+}
+
+.bocadillo {
+    background: #1b2a3a !important;
+    color: #a5d8ff !important;
+    padding: 10px 15px !important;
+    border-radius: 12px !important;
+    border: 1px solid #228be6 !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 10px !important;
+    text-align: center !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+    position: relative !important;
+    width: 90% !important;
+}
+
+.bocadillo::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: -8px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    border-width: 8px 8px 0 !important;
+    border-style: solid !important;
+    border-color: #1b2a3a transparent !important;
+    display: block !important;
+    width: 0 !important;
+}
+
+.esdeath-input {
+    width: 100% !important;
+    background: #121e2a !important;
+    border: 1px solid #228be6 !important;
+    border-radius: 6px !important;
+    padding: 8px 10px !important;
+    color: #e9ecef !important;
+    font-size: 0.85rem !important;
+    margin-top: 8px !important;
+    margin-bottom: 15px !important;
+    outline: none !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
+    transition: border-color 0.3s, box-shadow 0.3s !important;
+}
+
+.esdeath-input:focus {
+    border-color: #a5d8ff !important;
+    box-shadow: 0 0 10px rgba(165, 216, 255, 0.5) !important;
+}
+
+.esdeath-input::placeholder {
+    color: #6272a4 !important;
+}

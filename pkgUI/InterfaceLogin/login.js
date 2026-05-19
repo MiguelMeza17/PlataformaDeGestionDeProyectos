@@ -27,13 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const userRol = usuario.rol !== undefined ? usuario.rol.toString() : "";
 
                     if (userRol === "Admin" || userRol === "0") {
-                        window.location.href = "/pkgUI/InterfaceAdmin/admin.html";
+                        window.location.href = "/InterfaceAdmin/admin.html";
                     } else if (userRol === "Manager" || userRol === "1") {
-                        window.location.href = "/pkgUI/InterfaceLeader/leader.html";
-                    } else if (userRol === "Developer" || userRol === "2") {
-                        window.location.href = "/pkgUI/InterfaceDeveloper/developer.html";
-                    } else {
-                        window.location.href = "/pkgUI/InterfaceLeader/leader.html";
+                        window.location.href = "/InterfaceLeader/leader.html";
+                    } else(userRol === "Developer" || userRol === "2") {
+                        window.location.href = "/InterfaceDeveloper/developer.html";
                     }
                 } else {
                     alert("❌ Nombre o contraseña incorrectos");

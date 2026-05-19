@@ -1,6 +1,7 @@
 body {
     font-family: 'Segoe UI', sans-serif;
-    background-color: #f0f2f5;
+    /* Cambio a fondo oscuro cyberpunk */
+    background-color: #0b0f19; 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -9,40 +10,72 @@ body {
 }
 
 .container {
-    background: white;
+    /* Fondo oscuro traslúcido para los paneles */
+    background: #111827; 
     padding: 2rem;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    /* Borde sutil y sombra con el resplandor azul característico */
+    border: 1px solid rgba(34, 139, 230, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(34, 139, 230, 0.1);
     width: 450px;
 }
 
-h2 { color: #1a73e8; margin-top: 0; }
+/* El título ahora lleva el azul brillante del proyecto */
+h2 { 
+    color: #228be6; 
+    margin-top: 0; 
+    text-shadow: 0 0 10px rgba(34, 139, 230, 0.3);
+}
 
+/* Campos de texto oscurecidos que combinan con el ChatBot input */
 input, textarea, select {
     width: 100%;
     padding: 12px;
     margin: 10px 0;
-    border: 1px solid #ced4da;
+    background-color: #1f2937;
+    color: #ffffff;
+    border: 1px solid rgba(34, 139, 230, 0.3);
     border-radius: 6px;
     box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+/* Efecto Focus para cuando el usuario hace clic en un input */
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #228be6;
+    box-shadow: 0 0 8px rgba(34, 139, 230, 0.5);
 }
 
 textarea { height: 80px; resize: none; }
 
 .row { display: flex; gap: 10px; }
-.field { flex: 1; text-align: left; font-size: 0.8rem; color: #555; }
+/* Etiquetas de texto sutiles */
+.field { 
+    flex: 1; 
+    text-align: left; 
+    font-size: 0.8rem; 
+    color: #9ca3af; 
+}
 
+/* El botón de envío con el estilo interactivo de tu interfaz */
 .btn-send {
     width: 100%;
     padding: 14px;
-    background-color: #1a73e8;
+    background-color: #228be6;
     color: white;
     border: none;
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
     margin-top: 10px;
+    box-shadow: 0 0 10px rgba(34, 139, 230, 0.3);
     transition: 0.3s;
 }
 
-.btn-send:hover { background-color: #1557b0; }
+/* Efecto Hover del botón */
+.btn-send:hover { 
+    background-color: #1c7ed6; 
+    box-shadow: 0 0 20px #228be6, 0 0 30px rgba(34, 139, 230, 0.6);
+    transform: scale(1.02);
+}

@@ -9,13 +9,15 @@ body {
     justify-content: center;
     align-items: center;
     font-family: 'Poppins', sans-serif;
-    background-color: #ffffff; /* Fondo blanco igual al login */
+    /* TRANSFORMADO: Fondo oscuro profundo en lugar del blanco */
+    background-color: #0b0f19; 
 }
 
 .main-title {
     font-family: 'Orbitron', sans-serif;
-    color: #00cc6e; /* Verde neón más oscuro para legibilidad en blanco */
-    text-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+    /* Color verde neón puro y brillante para destacar sobre el fondo oscuro */
+    color: #00ff88; 
+    text-shadow: 0 0 15px rgba(0, 255, 136, 0.6), 0 0 30px rgba(0, 255, 136, 0.2);
     margin-bottom: 20px;
     font-size: 1.8rem;
     text-align: center;
@@ -23,54 +25,67 @@ body {
 }
 
 .container {
-    background: #ffffff;
+    /* Fondo del contenedor ahora es un panel traslúcido oscuro */
+    background: #111827;
     padding: 2.5rem;
     border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
-    width: 400px; /* Un poco más ancho para los selects */
+    /* Borde sutil y sombra con resplandor verde característico */
+    border: 1px solid rgba(0, 255, 136, 0.15);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 255, 136, 0.05);
+    width: 400px;
     text-align: center;
-    border: 1px solid #f0f0f0;
     transition: 0.4s ease;
 }
 
 .container:hover {
     border-color: #00ff88;
-    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2), 0 0 15px rgba(0, 255, 136, 0.1);
 }
 
 .register-icon {
     width: 60px;
     height: 60px;
     margin-bottom: 10px;
+    /* Efecto de brillo para el icono si es un PNG transparente */
+    filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.4));
 }
 
 h2 { 
-    color: #333; 
+    /* Texto principal ahora es blanco para legibilidad */
+    color: #ffffff; 
     font-family: 'Orbitron', sans-serif;
     margin-bottom: 1.5rem; 
     letter-spacing: 3px;
     font-size: 1.4rem;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
 }
 
+/* Campos de entrada oscurecidos que integran perfectamente */
 input, select {
     width: 100%;
     padding: 12px;
     margin: 8px 0;
-    border: 1px solid #e0e0e0;
+    background-color: #1f2937;
+    color: #ffffff;
+    border: 1px solid rgba(0, 255, 136, 0.25);
     border-radius: 10px;
-    background: #fdfdfd;
-    color: #333;
     font-size: 0.9rem;
     transition: 0.3s;
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
 
+/* Modificamos las opciones de la lista desplegable (Select) para que no salgan blancas */
+select option {
+    background-color: #111827;
+    color: #ffffff;
+}
+
 input:focus, select:focus {
     outline: none;
     border-color: #00ff88;
-    background: #fff;
-    box-shadow: 0 0 8px rgba(0, 255, 136, 0.2);
+    background: #1f2937;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
 }
 
 .btn-register {
@@ -86,27 +101,32 @@ input:focus, select:focus {
     color: #000; 
     margin-top: 1.2rem;
     transition: 0.3s;
-    box-shadow: 0 5px 15px rgba(0, 255, 136, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
 }
 
 .btn-register:hover {
-    background: #00cc6e;
+    background: #00ffaa;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 255, 136, 0.3);
+    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.6), 0 0 15px #00ff88;
 }
 
 .footer-links { 
     margin-top: 1.5rem; 
-    color: #777; 
+    /* Color de texto secundario atenuado */
+    color: #9ca3af; 
     font-size: 0.85rem;
 }
 
 a { 
-    color: #00cc6e; 
+    color: #00ff88; 
     text-decoration: none; 
     font-weight: bold; 
+    text-shadow: 0 0 5px rgba(0, 255, 136, 0.2);
+    transition: 0.3s;
 }
 
 a:hover { 
+    color: #00ffaa;
     text-decoration: underline; 
+    text-shadow: 0 0 10px #00ff88;
 }
