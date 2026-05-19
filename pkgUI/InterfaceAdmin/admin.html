@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Administrador - Reportes y Avance</title>
+    <link rel="stylesheet" href="admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="admin-grid">
+        
+        <section class="card">
+            <h2>📝 Generar Reporte Oficial</h2>
+            <form id="reportForm">
+                <input type="text" id="rOuid" placeholder="OUID del Reporte" required>
+                <input type="text" id="rName" placeholder="Nombre del Reporte (Ej: Semanal)" required>
+                <textarea id="rDesc" placeholder="Descripción general..."></textarea>
+                
+                <label>Fecha del Reporte:</label>
+                <input type="date" id="rDate" required>
+                
+                <textarea id="rSummary" placeholder="Resumen del progreso..."></textarea>
+                <textarea id="rRetarded" placeholder="Tareas retrasadas / Obstáculos..."></textarea>
+                
+                <button type="submit" class="btn-primary">Guardar y Notificar</button>
+            </form>
+        </section>
+
+        <section class="card stats-section">
+            <h2>📊 Estado del Proyecto</h2>
+            <div class="progress-circle">
+                <span id="percentageText">0%</span>
+            </div>
+            <p>Porcentaje de tareas terminadas</p>
+            
+            <div class="chart-container">
+                <canvas id="taskChart"></canvas>
+            </div>
+        </section>
+
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

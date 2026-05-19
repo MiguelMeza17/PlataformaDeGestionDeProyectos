@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Scrum - Developer</title>
+    <link rel="stylesheet" href="developer.css">
+</head>
+<body>
+
+    <h1>Tablero Scrum - Desarrollador</h1>
+
+    <div class="scrum-board">
+        <div class="column" id="col-todo">
+            <h2>📝 Por Hacer</h2>
+            <div id="tasks-todo">
+                <div class="task-card todo" id="task-1">
+                    <h3>Crear API de Usuarios</h3>
+                    <p>Implementar el método POST en C#.</p>
+                    <button onclick="moversADesarrollo('task-1')">Empezar Tarea</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="column" id="col-doing">
+            <h2>⚙️ En Desarrollo</h2>
+            <div id="tasks-doing"></div>
+        </div>
+
+        <div class="column" id="col-done">
+            <h2>✅ Terminadas</h2>
+            <div id="tasks-done"></div>
+        </div>
+    </div>
+
+    <script src="developer.js"></script>
+</body>
+</html>

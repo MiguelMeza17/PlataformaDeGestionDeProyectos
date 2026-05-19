@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Gestión de Proyectos</title>
+    <link rel="stylesheet" href="/pkgUI/InterfaceLogin/login.css">
+    <link rel="icon" href="../GestionDeProyectos/pkgUI/Imagenes/Imagen.png" type="image/x-icon">
+</head>
+<body>
+    <h1 class="main-title">PLATAFORMA DE GESTIÓN DE PROYECTOS</h1>
+
+    <div class="container">
+        <div class="icon-container">
+            <img src="/Imagenes/Imagen.png" alt="Icono" class="login-icon">
+        </div>
+
+        <h2>LOGIN</h2>
+        
+        <form id="loginForm">
+            <input type="text" id="nombreLogin" placeholder="👤 Nombre de usuario" required>
+            <input type="password" id="passLogin" placeholder="🔒 Contraseña" required>
+            
+            <button type="submit" class="btn-login">ENTRAR</button>
+        </form>
+
+        <div class="footer-links">
+            <p>¿No tienes cuenta? <a href="/pkgUI/InterfaceRegister/registrar.html">Regístrate aquí</a></p>
+        </div>
+    </div>
+    <script src="/pkgUI/InterfaceLogin/login.js"></script>
+</body>
+</html>

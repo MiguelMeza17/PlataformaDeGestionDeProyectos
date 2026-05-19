@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column; 
+    justify-content: center;
+    align-items: center;
+    font-family: 'Poppins', sans-serif;
+    background-color: #ffffff; /* Fondo blanco igual al login */
+}
+
+.main-title {
+    font-family: 'Orbitron', sans-serif;
+    color: #00cc6e; /* Verde neón más oscuro para legibilidad en blanco */
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.container {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+    width: 400px; /* Un poco más ancho para los selects */
+    text-align: center;
+    border: 1px solid #f0f0f0;
+    transition: 0.4s ease;
+}
+
+.container:hover {
+    border-color: #00ff88;
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+}
+
+.register-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+}
+
+h2 { 
+    color: #333; 
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 1.5rem; 
+    letter-spacing: 3px;
+    font-size: 1.4rem;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background: #fdfdfd;
+    color: #333;
+    font-size: 0.9rem;
+    transition: 0.3s;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #00ff88;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(0, 255, 136, 0.2);
+}
+
+.btn-register {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    font-family: 'Orbitron', sans-serif;
+    background: #00ff88; 
+    color: #000; 
+    margin-top: 1.2rem;
+    transition: 0.3s;
+    box-shadow: 0 5px 15px rgba(0, 255, 136, 0.2);
+}
+
+.btn-register:hover {
+    background: #00cc6e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 255, 136, 0.3);
+}
+
+.footer-links { 
+    margin-top: 1.5rem; 
+    color: #777; 
+    font-size: 0.85rem;
+}
+
+a { 
+    color: #00cc6e; 
+    text-decoration: none; 
+    font-weight: bold; 
+}
+
+a:hover { 
+    text-decoration: underline; 
+}

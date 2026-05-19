@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Leader - Crear Tareas</title>
+    <link rel="stylesheet" href="leader.css">
+</head>
+<body>
+    <div class="container">
+        <h2>📋 Generar Nueva Tarea</h2>
+        <p>Complete los datos para asignar al tablero del Developer</p>
+        
+        <form id="taskForm">
+            <input type="text" id="ouid" placeholder="ID Único de Tarea (OUID)" required>
+            
+            <input type="text" id="nombreTarea" placeholder="Nombre de la Tarea" required>
+            
+            <textarea id="descripcion" placeholder="Descripción detallada..." required></textarea>
+            
+            <div class="row">
+                <div class="field">
+                    <label>Fecha Inicio:</label>
+                    <input type="date" id="fechaInicio" required>
+                </div>
+                <div class="field">
+                    <label>Fecha Límite:</label>
+                    <input type="date" id="fechaLimite" required>
+                </div>
+            </div>
+
+            <select id="prioridad">
+                <option value="Baja">Prioridad Baja</option>
+                <option value="Media" selected>Prioridad Media</option>
+                <option value="Alta">Prioridad Alta</option>
+                <option value="Urgente">Urgente </option>
+            </select>
+
+            <button type="submit" class="btn-send">🚀 Enviar a "Por Hacer"</button>
+        </form>
+    </div>
+
+    <script src="leader.js"></script>
+</body>
+</html>

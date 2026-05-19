@@ -1,0 +1,7 @@
+# Omitir carpetas de compilación
+bin/
+obj/
+
+# Omitir caché de Visual Studio / VS Code
+*.lscache
+.vs/

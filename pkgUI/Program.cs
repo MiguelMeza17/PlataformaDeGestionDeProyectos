@@ -1,0 +1,82 @@
+﻿using System;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http;
+using GestionDeProyectos.pkgDomain;
+using GestionDeProyectos.pkgUI;
+
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    ContentRootPath = AppContext.BaseDirectory
+});
+
+builder.Services.AddCors(options => {
+    options.AddDefaultPolicy(policy => {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+builder.Services.ConfigureHttpJsonOptions(options => {
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
+var app = builder.Build();
+app.UseCors();
+
+app.MapPost("/api/registrar", (UsuarioRegistroDTO datos) => {
+    try 
+    {
+        var controlador = clsController.opGetInstance();
+
+        if (!Enum.TryParse(datos.rol, true, out clsRoles rolEnum))
+        {
+            return Results.BadRequest(new { mensaje = "El rol proporcionado no existe en el sistema." });
+        }
+
+        bool exito = controlador.opRegisterStakeholder(
+            datos.id, 
+            datos.nombre, 
+            "Registro desde Web", 
+            datos.email, 
+            datos.password, 
+            rolEnum 
+        );
+
+        if (exito) {
+            return Results.Ok(new { mensaje = "Usuario guardado con éxito en Oracle" });
+        } else {
+            return Results.BadRequest(new { mensaje = "El ID ya existe o hubo un error en la BD" });
+        }
+    }
+    catch (Exception ex) 
+    {
+        return Results.Problem("Error interno: " + ex.Message);
+    }
+});
+
+app.MapPost("/api/login", (LoginDTO datos) => {
+    try 
+    {
+        var controlador = clsController.opGetInstance();
+        var usuario = controlador.opLoginStakeholder(datos.nombre, datos.password);
+
+        if (usuario != null) {
+            return Results.Ok(new { mensaje = "Bienvenido" });
+        }
+        return Results.Json(new { mensaje = "Usuario o contraseña incorrectos" }, statusCode: 401);
+    }
+    catch (Exception ex) 
+    {
+        return Results.Problem("Error interno en el login: " + ex.Message);
+    }
+});
+
+Console.WriteLine("Servidor iniciado en http://localhost:5000");
+app.Run("http://localhost:5000");
+
+public record UsuarioRegistroDTO(string id, string nombre, string email, string password, string rol);
+public record LoginDTO(string nombre, string password);

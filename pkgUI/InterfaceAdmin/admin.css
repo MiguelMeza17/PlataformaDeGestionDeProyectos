@@ -1,0 +1,28 @@
+body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1100px; margin: auto; }
+
+.card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+h2 { color: #2c3e50; font-size: 1.4rem; margin-top: 0; }
+
+input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+textarea { height: 60px; }
+
+.btn-primary { 
+    width: 100%; padding: 12px; background: #2c3e50; color: white; 
+    border: none; border-radius: 6px; cursor: pointer; font-weight: bold; 
+}
+
+/* Círculo de porcentaje */
+.progress-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: conic-gradient(#2ecc71 var(--progress, 0%), #e0e0e0 0deg);
+    display: flex; align-items: center; justify-content: center;
+    margin: 20px auto; position: relative;
+}
+.progress-circle span {
+    width: 100px; height: 100px; background: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: bold; color: #2ecc71;
+}
+
+.chart-container { margin-top: 20px; height: 250px; }
