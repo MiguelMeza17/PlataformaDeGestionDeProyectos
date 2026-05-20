@@ -17,7 +17,6 @@ namespace GestionDeProyectos.pkgUI
 
     private clsController()
     {
-        attStakeholders.Clear();
 
         attStakeholders.Clear();
 

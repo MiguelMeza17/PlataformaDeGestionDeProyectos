@@ -22,16 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (respuesta.ok) {
                     const usuario = await respuesta.json();
                     
+                    // Nota: C# suele serializar a minúsculas en JSON (name en vez de Name)
                     alert("👋 ¡Hola de nuevo, " + (usuario.name || usuario.nombre) + "!");
                     
-                    const userRol = usuario.rol !== undefined ? usuario.rol.toString() : "";
-
-                    if (userRol === "Admin" || userRol === "0") {
-                        window.location.href = "/InterfaceAdmin/admin.html";
-                    } else if (userRol === "Manager" || userRol === "1") {
-                        window.location.href = "/InterfaceLeader/leader.html";
-                    } else(userRol === "Developer" || userRol === "2") {
-                        window.location.href = "/InterfaceDeveloper/developer.html";
+                    // Redirección según Rol
+                    if (usuario.rol === "Developer") {
+                        window.location.href = "../InterfaceDeveloper/developer.html";
+                    } else if (usuario.rol === "Admin") {
+                        window.location.href = "../InterfaceAdmin/admin.html";
+                    } else {
+                        window.location.href = "../InterfaceLeader/leader.html";
                     }
                 } else {
                     alert("❌ Nombre o contraseña incorrectos");
