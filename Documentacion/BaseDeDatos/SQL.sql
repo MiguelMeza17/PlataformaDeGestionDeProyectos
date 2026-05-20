@@ -1,12 +1,14 @@
 /*==============================================================*/
-/*          PL/SQL - CONSULTAS, REPORTES Y OBJETOS              */
+/* PL/SQL - CONSULTAS, REPORTES Y OBJETOS                */
 /*==============================================================*/
 /*==============================================================*/
 
 
 /*==============================================================*/
-/* REPORTE : LISTAR PROYECTOS Y SU AVANCE                      */                                          */
+/* REPORTE : LISTAR PROYECTOS Y SU AVANCE                       */                                 */
 /*==============================================================*/
+
+SET SERVEROUTPUT ON;
 
 DECLARE
     CURSOR C_PROYECTOS IS
@@ -30,7 +32,7 @@ END;
 /
 
 /*==============================================================*/
-/* REPORTE : TAREAS ATRASADAS                                  */                                                */
+/* REPORTE : TAREAS ATRASADAS                                   */                                   */
 /*==============================================================*/
 
 DECLARE
@@ -62,14 +64,14 @@ END;
 
 DECLARE
 
-    CURSOR C_TAREAS (P_PROYECTO VARCHAR2) IS
+    CURSOR C_TAREAS (P_PROYECTO PROYECTO.ID_PROYECTO%TYPE) IS
         SELECT NOMBRE
         FROM TAREA
         WHERE ID_PROYECTO = P_PROYECTO;
 
 BEGIN
 
-    FOR V_TAREA IN C_TAREAS('P1') LOOP
+    FOR V_TAREA IN C_TAREAS(100) LOOP
 
         DBMS_OUTPUT.PUT_LINE(
             'TAREA: ' || V_TAREA.NOMBRE
@@ -135,7 +137,7 @@ END;
 /
 
 /*==============================================================*/
-/* REPORTE 5: ESTADO GENERAL DEL PROYECTO                       */                                                      */
+/* REPORTE 5: ESTADO GENERAL DEL PROYECTO                       */                                         */
 /*==============================================================*/
 
 DECLARE
@@ -173,14 +175,13 @@ END;
 /
 
 /*==============================================================*/
-/* PACKAGE USUARIO                                       */
+/* PACKAGE USUARIO                                              */
 /*==============================================================*/
 
 CREATE OR REPLACE PACKAGE PKG_USUARIO AS
 
     PROCEDURE INSERTAR_USUARIO
     (
-        P_ID_USUARIO VARCHAR2,
         P_NOMBRE VARCHAR2,
         P_DESCRIPCION VARCHAR2,
         P_CORREO VARCHAR2,
@@ -190,18 +191,22 @@ CREATE OR REPLACE PACKAGE PKG_USUARIO AS
 
     PROCEDURE ACTUALIZAR_USUARIO
     (
-        P_ID_USUARIO VARCHAR2,
-        P_NOMBRE VARCHAR2
+        P_ID_USUARIO NUMBER,
+        P_NOMBRE VARCHAR2,
+        P_DESCRIPCION VARCHAR2,
+        P_CORREO VARCHAR2,
+        P_CONTRASENA VARCHAR2,
+        P_ID_ROL VARCHAR2
     );
 
     PROCEDURE ELIMINAR_USUARIO
     (
-        P_ID_USUARIO VARCHAR2
+        P_ID_USUARIO NUMBER
     );
 
     FUNCTION CONSULTAR_USUARIO
     (
-        P_ID_USUARIO VARCHAR2
+        P_ID_USUARIO NUMBER
     )
     RETURN VARCHAR2;
 
@@ -211,7 +216,6 @@ CREATE OR REPLACE PACKAGE BODY PKG_USUARIO AS
 
     PROCEDURE INSERTAR_USUARIO
     (
-        P_ID_USUARIO VARCHAR2,
         P_NOMBRE VARCHAR2,
         P_DESCRIPCION VARCHAR2,
         P_CORREO VARCHAR2,
@@ -221,16 +225,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_USUARIO AS
     IS
     BEGIN
 
-        INSERT INTO USUARIO
-        VALUES
-        (
-            P_ID_USUARIO,
-            P_NOMBRE,
-            P_DESCRIPCION,
-            P_CORREO,
-            P_CONTRASENA,
-            P_ID_ROL
-        );
+        INSERT INTO USUARIO (NOMBRE, DESCRIPCION, CORREO, CONTRASENA, ID_ROL)
+        VALUES (P_NOMBRE, P_DESCRIPCION, P_CORREO, P_CONTRASENA, P_ID_ROL);
 
     EXCEPTION
         WHEN DUP_VAL_ON_INDEX THEN
@@ -239,21 +235,27 @@ CREATE OR REPLACE PACKAGE BODY PKG_USUARIO AS
 
     PROCEDURE ACTUALIZAR_USUARIO
     (
-        P_ID_USUARIO VARCHAR2,
-        P_NOMBRE VARCHAR2
+        P_ID_USUARIO NUMBER,
+        P_NOMBRE VARCHAR2,
+        P_DESCRIPCION VARCHAR2,
+        P_CORREO VARCHAR2,
+        P_CONTRASENA VARCHAR2,
+        P_ID_ROL VARCHAR2
     )
     IS
     BEGIN
-
         UPDATE USUARIO
-        SET NOMBRE = P_NOMBRE
+        SET NOMBRE = P_NOMBRE,
+            DESCRIPCION = P_DESCRIPCION,
+            CORREO = P_CORREO,
+            CONTRASENA = P_CONTRASENA,
+            ID_ROL = P_ID_ROL
         WHERE ID_USUARIO = P_ID_USUARIO;
-
     END;
 
     PROCEDURE ELIMINAR_USUARIO
     (
-        P_ID_USUARIO VARCHAR2
+        P_ID_USUARIO NUMBER
     )
     IS
     BEGIN
@@ -265,7 +267,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_USUARIO AS
 
     FUNCTION CONSULTAR_USUARIO
     (
-        P_ID_USUARIO VARCHAR2
+        P_ID_USUARIO NUMBER
     )
     RETURN VARCHAR2
     IS
@@ -288,8 +290,20 @@ CREATE OR REPLACE PACKAGE BODY PKG_USUARIO AS
 
 END PKG_USUARIO;
 /
+SELECT * FROM USUARIO
 
+BEGIN
+    PKG_USUARIO.INSERTAR_USUARIO(
+       'Camilo',
+       'Desde la Web',
+       'lagos@gmail.com',
+       'q1w2e3r4',
+       'R3'
+    );
+    COMMIT;
+END;
 /
+
 /*==============================================================*/
 /* RECORD USUARIOS Y SUS CONTRASEÑAS                            */
 /*==============================================================*/
@@ -323,6 +337,8 @@ BEGIN
 
 END;
 /
+
+
 /*==============================================================*/
 /* TRIGGER CORREO                                               */
 /*==============================================================*/
@@ -342,6 +358,18 @@ BEGIN
 END;
 /
 
+BEGIN
+    PKG_USUARIO.ACTUALIZAR_USUARIO(
+       105,
+       'MiguelMeza',
+       'Desde la Web',
+       'miguel@gmail.com',
+       'q1w2e3r4t5',
+       'R3'
+    );
+    COMMIT;
+END;
+/
 /*==============================================================*/
 /* TRIGGER FECHA LIMITE TAREA                                   */
 /*==============================================================*/
@@ -443,22 +471,6 @@ ON USUARIO(CORREO);
 
 CREATE INDEX IDX_TAREA_PROYECTO
 ON TAREA(ID_PROYECTO);
-
-/*==============================================================*/
-/* SECUENCIA 1                                                  */
-/*==============================================================*/
-
-CREATE SEQUENCE SEQ_USUARIO
-START WITH 100
-INCREMENT BY 1;
-
-/*==============================================================*/
-/* SECUENCIA 2                                                  */
-/*==============================================================*/
-
-CREATE SEQUENCE SEQ_PROYECTO
-START WITH 100
-INCREMENT BY 1;
 
 /*==============================================================*/
 /* FORMATO DE FECHA                                             */
