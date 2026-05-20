@@ -36,8 +36,14 @@ END;
 /*==============================================================*/
 
 DECLARE
+    -- Agregamos la subconsulta para traer el nombre del usuario dentro del cursor
     CURSOR C_TAREAS IS
-        SELECT NOMBRE, FECHA_LIMITE
+        SELECT 
+            NOMBRE, 
+            FECHA_LIMITE,
+            (SELECT U.NOMBRE 
+             FROM USUARIO U 
+             WHERE U.ID_USUARIO = TAREA.ID_USUARIO_DESARROLLA) AS NOMBRE_USUARIO
         FROM TAREA;
 
 BEGIN
@@ -49,7 +55,9 @@ BEGIN
         IF V_TAREA.FECHA_LIMITE < SYSDATE THEN
 
             DBMS_OUTPUT.PUT_LINE(
-                'Tarea atrasada: ' || V_TAREA.NOMBRE
+                'Tarea: ' || V_TAREA.NOMBRE || 
+                ' | Usuario: ' || NVL(V_TAREA.NOMBRE_USUARIO, 'Sin Asignar') ||
+                ' | Fecha Límite: ' || TO_CHAR(V_TAREA.FECHA_LIMITE, 'DD/MM/YYYY')
             );
 
         END IF;
@@ -471,24 +479,3 @@ ON USUARIO(CORREO);
 
 CREATE INDEX IDX_TAREA_PROYECTO
 ON TAREA(ID_PROYECTO);
-
-/*==============================================================*/
-/* FORMATO DE FECHA                                             */
-/*==============================================================*/
-
-SELECT
-    NOMBRE,
-    TO_CHAR(FECHA_INICIO, 'DD/MM/YYYY')
-FROM PROYECTO;
-
-/*==============================================================*/
-/* SUBCONSULTA                                                  */
-/*==============================================================*/
-
-SELECT NOMBRE
-FROM USUARIO
-WHERE ID_USUARIO IN
-(
-    SELECT ID_USUARIO_DESARROLLA
-    FROM TAREA
-);
