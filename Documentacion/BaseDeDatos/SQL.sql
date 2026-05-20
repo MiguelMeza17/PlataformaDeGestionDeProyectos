@@ -3,7 +3,15 @@
 /*          PL/SQL - CONSULTAS, REPORTES Y OBJETOS              */
 /*==============================================================*/
 /*==============================================================*/
+DROP VIEW VW_REPORTE_PROYECTOS;
 
+DROP SEQUENCE SEQ_USUARIO;
+DROP SEQUENCE SEQ_PROYECTO;
+
+DROP INDEX IDX_USUARIO_CORREO;
+DROP INDEX IDX_TAREA_PROYECTO;
+
+DROP PACKAGE PKG_USUARIO;
 
 /*==============================================================*/
 /* REPORTE 1: LISTAR PROYECTOS Y SU AVANCE                      */
@@ -59,6 +67,7 @@ BEGIN
 
 END;
 /
+
 /*==============================================================*/
 /* REPORTE 3: USO DE WHILE CON CURSOR                           */
 /*==============================================================*/
@@ -91,6 +100,7 @@ BEGIN
 
 END;
 /
+
 /*==============================================================*/
 /* REPORTE 4: IF ANIDADO CON CURSOR                             */
 /*==============================================================*/
@@ -186,6 +196,31 @@ END;
 /
 
 /*==============================================================*/
+/* CURSOR CON PARAMETRO                                         */
+/* REQUISITO FALTANTE                                           */
+/*==============================================================*/
+
+DECLARE
+
+    CURSOR C_TAREAS_PROYECTO(P_ID_PROYECTO VARCHAR2) IS
+        SELECT NOMBRE
+        FROM TAREA
+        WHERE ID_PROYECTO = P_ID_PROYECTO;
+
+BEGIN
+
+    FOR V_TAREA IN C_TAREAS_PROYECTO('P1') LOOP
+
+        DBMS_OUTPUT.PUT_LINE(
+            'TAREA: ' || V_TAREA.NOMBRE
+        );
+
+    END LOOP;
+
+END;
+/
+
+/*==============================================================*/
 /* PACKAGE SPECIFICATION                                        */
 /*==============================================================*/
 
@@ -204,7 +239,11 @@ CREATE OR REPLACE PACKAGE PKG_USUARIO AS
     PROCEDURE ACTUALIZAR_USUARIO
     (
         P_ID_USUARIO VARCHAR2,
-        P_NOMBRE VARCHAR2
+        P_NOMBRE VARCHAR2,
+        P_DESCRIPCION VARCHAR2,
+        P_CORREO VARCHAR2,
+        P_CONTRASENA VARCHAR2,
+        P_ID_ROL VARCHAR2
     );
 
     PROCEDURE ELIMINAR_USUARIO
@@ -258,13 +297,22 @@ CREATE OR REPLACE PACKAGE BODY PKG_USUARIO AS
     PROCEDURE ACTUALIZAR_USUARIO
     (
         P_ID_USUARIO VARCHAR2,
-        P_NOMBRE VARCHAR2
+        P_NOMBRE VARCHAR2,
+        P_DESCRIPCION VARCHAR2,
+        P_CORREO VARCHAR2,
+        P_CONTRASENA VARCHAR2,
+        P_ID_ROL VARCHAR2
     )
     IS
     BEGIN
 
         UPDATE USUARIO
-        SET NOMBRE = P_NOMBRE
+        SET
+        NOMBRE = P_NOMBRE,
+        DESCRIPCION = P_DESCRIPCION,
+        CORREO = P_CORREO,
+        CONTRASENA = P_CONTRASENA,
+        ID_ROL = P_ID_ROL
         WHERE ID_USUARIO = P_ID_USUARIO;
 
     END;
@@ -306,184 +354,67 @@ CREATE OR REPLACE PACKAGE BODY PKG_USUARIO AS
 
 END PKG_USUARIO;
 /
-
-/*==============================================================*/
-/* EXCEPCION 1                                                  */
-/*==============================================================*/
-
-DECLARE
-    V_NOMBRE VARCHAR2(50);
+/*
 BEGIN
 
-    SELECT NOMBRE
-    INTO V_NOMBRE
-    FROM USUARIO
-    WHERE ID_USUARIO = 'X';
-
-EXCEPTION
-    WHEN NO_DATA_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('USUARIO NO EXISTE');
-END;
-/
-
-/*==============================================================*/
-/* EXCEPCION 2                                                  */
-/*==============================================================*/
-
-DECLARE
-    V_RESULTADO NUMBER;
-BEGIN
-
-    V_RESULTADO := 10 / 0;
-
-EXCEPTION
-    WHEN ZERO_DIVIDE THEN
-        DBMS_OUTPUT.PUT_LINE('DIVISION ENTRE CERO');
-END;
-/
-
-/*==============================================================*/
-/* EXCEPCION 3                                                  */
-/*==============================================================*/
-
-BEGIN
-
-    INSERT INTO ROL VALUES ('R1', 'ADMIN');
-
-EXCEPTION
-    WHEN DUP_VAL_ON_INDEX THEN
-        DBMS_OUTPUT.PUT_LINE('ROL DUPLICADO');
+    PKG_USUARIO.INSERTAR_USUARIO
+    (
+        'U10',
+        'Oscar',
+        'Admin',
+        'oscar@gmail.com',
+        '123456',
+        'R1'
+    );
 
 END;
 /
-
+*/
 /*==============================================================*/
-/* EXCEPCION 4                                                  */
-/*==============================================================*/
-
-DECLARE
-    V_NUMERO NUMBER := 'ABC';
-
-EXCEPTION
-    WHEN VALUE_ERROR THEN
-        DBMS_OUTPUT.PUT_LINE('ERROR DE CONVERSION');
-
-END;
-/
-
-/*==============================================================*/
-/* EXCEPCION 5                                                  */
-/*==============================================================*/
-
-BEGIN
-
-    DELETE FROM PROYECTO
-    WHERE ID_PROYECTO = 'P1';
-
-EXCEPTION
-    WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('NO SE PUEDE ELIMINAR');
-
-END;
-/
-
-/*==============================================================*/
-/* CURSOR CON PARAMETRO                                         */
+/* TIPOS COMPUESTOS + BULK COLLECT + RECORD + TABLE             */
 /*==============================================================*/
 
 DECLARE
 
-    CURSOR C_TAREAS (P_PROYECTO VARCHAR2) IS
-        SELECT NOMBRE
-        FROM TAREA
-        WHERE ID_PROYECTO = P_PROYECTO;
-
-BEGIN
-
-    FOR V_TAREA IN C_TAREAS('P1') LOOP
-
-        DBMS_OUTPUT.PUT_LINE(
-            'TAREA: ' || V_TAREA.NOMBRE
-        );
-
-    END LOOP;
-
-END;
-/
-
-/*==============================================================*/
-/* RECORD                                                       */
-/*==============================================================*/
-
-DECLARE
-
-    TYPE T_USUARIO IS RECORD
+    /* RECORD */
+    TYPE REC_USUARIO IS RECORD
     (
         NOMBRE USUARIO.NOMBRE%TYPE,
         CORREO USUARIO.CORREO%TYPE
     );
 
-    V_USER T_USUARIO;
+    /* TABLE */
+    TYPE TAB_PROYECTOS IS TABLE OF PROYECTO.NOMBRE%TYPE;
+
+    V_USUARIO REC_USUARIO;
+    V_PROYECTOS TAB_PROYECTOS;
 
 BEGIN
 
+    /* RECORD */
     SELECT NOMBRE, CORREO
-    INTO V_USER
+    INTO V_USUARIO
     FROM USUARIO
     WHERE ID_USUARIO = 'U1';
 
-    DBMS_OUTPUT.PUT_LINE(V_USER.NOMBRE);
-    DBMS_OUTPUT.PUT_LINE(V_USER.CORREO);
+    DBMS_OUTPUT.PUT_LINE(
+        'USUARIO: ' || V_USUARIO.NOMBRE ||
+        ' | CORREO: ' || V_USUARIO.CORREO
+    );
 
-END;
-/
-
-/*==============================================================*/
-/* TABLE TYPE                                                   */
-/*==============================================================*/
-
-DECLARE
-
-    TYPE T_NOMBRES IS TABLE OF VARCHAR2(50);
-
-    V_NOMBRES T_NOMBRES := T_NOMBRES();
-
-BEGIN
-
-    V_NOMBRES.EXTEND(3);
-
-    V_NOMBRES(1) := 'ANA';
-    V_NOMBRES(2) := 'CARLOS';
-    V_NOMBRES(3) := 'LAURA';
-
-    FOR I IN 1..V_NOMBRES.COUNT LOOP
-
-        DBMS_OUTPUT.PUT_LINE(V_NOMBRES(I));
-
-    END LOOP;
-
-END;
-/
-
-/*==============================================================*/
-/* BULK COLLECT                                                 */
-/*==============================================================*/
-
-DECLARE
-
-    TYPE T_PROYECTOS IS TABLE OF PROYECTO.NOMBRE%TYPE;
-
-    V_PROYECTOS T_PROYECTOS;
-
-BEGIN
-
+    /* BULK COLLECT */
     SELECT NOMBRE
     BULK COLLECT INTO V_PROYECTOS
-    FROM PROYECTO;
+    FROM PROYECTO
+    WHERE PORCENTAJE_DE_AVANCE >= 20
+    ORDER BY PORCENTAJE_DE_AVANCE DESC;
 
+    /* TABLE */
     FOR I IN 1..V_PROYECTOS.COUNT LOOP
 
-        DBMS_OUTPUT.PUT_LINE(V_PROYECTOS(I));
+        DBMS_OUTPUT.PUT_LINE(
+            'PROYECTO: ' || V_PROYECTOS(I)
+        );
 
     END LOOP;
 
@@ -491,159 +422,171 @@ END;
 /
 
 /*==============================================================*/
-/* TRIGGER 1                                                    */
+/* TRIGGER 1                                                     */
+/* VALIDAR CORREO GMAIL                                         */
 /*==============================================================*/
 
-CREATE OR REPLACE TRIGGER TRG_CORREO
+CREATE OR REPLACE TRIGGER TRG_CORREO_USUARIO
 BEFORE INSERT OR UPDATE ON USUARIO
 FOR EACH ROW
 BEGIN
 
     IF :NEW.CORREO NOT LIKE '%@gmail.com' THEN
-        RAISE_APPLICATION_ERROR(
+
+        RAISE_APPLICATION_ERROR
+        (
             -20001,
             'EL CORREO DEBE SER GMAIL'
         );
+
     END IF;
 
 END;
 /
 
 /*==============================================================*/
-/* TRIGGER 2                                                    */
+/* TRIGGER 2                                                     */
+/* VALIDAR FECHAS DE TAREA                                      */
 /*==============================================================*/
 
-CREATE OR REPLACE TRIGGER TRG_FECHAS
+CREATE OR REPLACE TRIGGER TRG_FECHAS_TAREA
 BEFORE INSERT OR UPDATE ON TAREA
 FOR EACH ROW
 BEGIN
 
     IF :NEW.FECHA_LIMITE < :NEW.FECHA_INICIO THEN
-        RAISE_APPLICATION_ERROR(
+
+        RAISE_APPLICATION_ERROR
+        (
             -20002,
-            'FECHA LIMITE INVALIDA'
+            'LA FECHA LIMITE NO PUEDE SER MENOR'
         );
+
     END IF;
 
 END;
 /
 
 /*==============================================================*/
-/* TRIGGER 3                                                    */
+/* TRIGGER 3                                                     */
+/* VALIDAR PORCENTAJE                                            */
 /*==============================================================*/
 
-CREATE OR REPLACE TRIGGER TRG_AVANCE
-BEFORE UPDATE ON PROYECTO
+CREATE OR REPLACE TRIGGER TRG_AVANCE_PROYECTO
+BEFORE INSERT OR UPDATE ON PROYECTO
 FOR EACH ROW
 BEGIN
 
     IF :NEW.PORCENTAJE_DE_AVANCE > 100 THEN
-        RAISE_APPLICATION_ERROR(
+
+        RAISE_APPLICATION_ERROR
+        (
             -20003,
-            'AVANCE INVALIDO'
+            'EL AVANCE NO PUEDE SER MAYOR A 100'
         );
+
     END IF;
 
 END;
 /
 
 /*==============================================================*/
-/* TRIGGER 4                                                    */
+/* TRIGGER 4                                                     */
+/* VALIDAR LONGITUD PASSWORD                                     */
 /*==============================================================*/
 
-CREATE OR REPLACE TRIGGER TRG_PASSWORD
-BEFORE INSERT ON USUARIO
+CREATE OR REPLACE TRIGGER TRG_PASSWORD_USUARIO
+BEFORE INSERT OR UPDATE ON USUARIO
 FOR EACH ROW
 BEGIN
 
     IF LENGTH(:NEW.CONTRASENA) < 6 THEN
-        RAISE_APPLICATION_ERROR(
+
+        RAISE_APPLICATION_ERROR
+        (
             -20004,
-            'PASSWORD MUY CORTA'
+            'PASSWORD DEMASIADO CORTA'
         );
+
     END IF;
 
 END;
 /
 
 /*==============================================================*/
-/* VISTA                                                        */
+/* VISTA                                                         */
+/* JOINS + CONDICIONES + ORDENAMIENTO                            */
+/*==============================================================*/
+/*==============================================================*/
+/* VISTA                                                         */
+/* JOINS + GROUP BY + FUNCIONES + SUBCONSULTA + ORDER BY        */
 /*==============================================================*/
 
-CREATE OR REPLACE VIEW VW_TAREAS_PROYECTO AS
+CREATE OR REPLACE VIEW VW_REPORTE_PROYECTOS AS
 
 SELECT
-    P.NOMBRE PROYECTO,
-    T.NOMBRE TAREA,
-    E.NOMBRE ESTADO
+    P.NOMBRE AS PROYECTO,
+    COUNT(T.ID_TAREA) AS TOTAL_TAREAS,
+    AVG(P.PORCENTAJE_DE_AVANCE) AS PROMEDIO_AVANCE,
+    TO_CHAR(P.FECHA_INICIO, 'DD/MM/YYYY') AS FECHA_INICIO
 FROM PROYECTO P
-JOIN TAREA T
+INNER JOIN TAREA T
     ON P.ID_PROYECTO = T.ID_PROYECTO
-JOIN ESTADO E
-    ON T.ID_ESTADO = E.ID_ESTADO;
+WHERE P.ID_PROYECTO IN
+(
+    SELECT ID_PROYECTO
+    FROM REPORTES
+)
+GROUP BY P.NOMBRE, P.FECHA_INICIO
+HAVING COUNT(T.ID_TAREA) > 0
+ORDER BY TOTAL_TAREAS DESC, P.NOMBRE ASC;
 /
+--SELECT * FROM VW_REPORTE_PROYECTOS;
 
 /*==============================================================*/
-/* CONSULTA TABLAS                                              */
+/* DICCIONARIO DE DATOS                                          */
 /*==============================================================*/
+
+/* TABLAS */
 
 SELECT TABLE_NAME
-FROM USER_TABLES;
+FROM USER_TABLES
+ORDER BY TABLE_NAME;
+
+/* PROCEDIMIENTOS Y FUNCIONES */
+
+SELECT OBJECT_NAME, OBJECT_TYPE
+FROM USER_PROCEDURES
+ORDER BY OBJECT_NAME;
 
 /*==============================================================*/
-/* CONSULTA PROCEDIMIENTOS                                      */
+/* INDICES                                                       */
 /*==============================================================*/
 
-SELECT OBJECT_NAME
-FROM USER_PROCEDURES;
-
-/*==============================================================*/
-/* INDICE 1                                                     */
-/*==============================================================*/
+/*
+SE CREA ESTE INDICE PORQUE EL CORREO ES MUY CONSULTADO
+AL MOMENTO DE INICIAR SESION O BUSCAR USUARIOS
+*/
 
 CREATE INDEX IDX_USUARIO_CORREO
 ON USUARIO(CORREO);
 
-/*==============================================================*/
-/* INDICE 2                                                     */
-/*==============================================================*/
+/*
+SE CREA ESTE INDICE PORQUE ID_PROYECTO ES UTILIZADO
+EN JOINS Y CONSULTAS FRECUENTES SOBRE TAREAS
+*/
 
 CREATE INDEX IDX_TAREA_PROYECTO
 ON TAREA(ID_PROYECTO);
 
 /*==============================================================*/
-/* SECUENCIA 1                                                  */
+/* SECUENCIAS                                                    */
 /*==============================================================*/
 
 CREATE SEQUENCE SEQ_USUARIO
 START WITH 100
 INCREMENT BY 1;
 
-/*==============================================================*/
-/* SECUENCIA 2                                                  */
-/*==============================================================*/
-
 CREATE SEQUENCE SEQ_PROYECTO
 START WITH 100
 INCREMENT BY 1;
-
-/*==============================================================*/
-/* FORMATO DE FECHA                                             */
-/*==============================================================*/
-
-SELECT
-    NOMBRE,
-    TO_CHAR(FECHA_INICIO, 'DD/MM/YYYY')
-FROM PROYECTO;
-
-/*==============================================================*/
-/* SUBCONSULTA                                                  */
-/*==============================================================*/
-
-SELECT NOMBRE
-FROM USUARIO
-WHERE ID_USUARIO IN
-(
-    SELECT ID_USUARIO_DESARROLLA
-    FROM TAREA
-);
