@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO; // <-- Agregado para poder manejar rutas de archivos
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders; // <-- Agregado para el mapeo de carpetas
 using Microsoft.AspNetCore.Http;
 using GestionDeProyectos.pkgDomain;
 using GestionDeProyectos.pkgUI;
@@ -26,6 +28,21 @@ builder.Services.ConfigureHttpJsonOptions(options => {
 
 var app = builder.Build();
 app.UseCors();
+
+// ==========================================
+// 🚨 CORRECCIÓN 1: ACTIVAR TUS ARCHIVOS HTML/CSS/JS
+// ==========================================
+// Obtenemos la ruta real de tu proyecto en la computadora
+string proyectoRaiz = Directory.GetCurrentDirectory(); 
+string rutaPkgUI = Path.Combine(proyectoRaiz, "pkgUI");
+
+// Le decimos a .NET que exponga públicamente la carpeta pkgUI
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(rutaPkgUI),
+    RequestPath = "/pkgUI" 
+});
+// ==========================================
 
 app.MapPost("/api/registrar", (UsuarioRegistroDTO datos) => {
     try 
@@ -65,7 +82,11 @@ app.MapPost("/api/login", (LoginDTO datos) => {
         var usuario = controlador.opLoginStakeholder(datos.nombre, datos.password);
 
         if (usuario != null) {
-            return Results.Ok(new { mensaje = "Bienvenido" });
+            // ==========================================
+            // 🚨 CORRECCIÓN 2: ENVIAR EL USUARIO CON SU ROL EN EL JSON
+            // ==========================================
+            // Retornamos tanto el mensaje como el objeto usuario (que contiene .rol o .nombre)
+            return Results.Ok(usuario); 
         }
         return Results.Json(new { mensaje = "Usuario o contraseña incorrectos" }, statusCode: 401);
     }

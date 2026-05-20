@@ -1,5 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
 
+:root {
+    --fondo-azul-oscuro: #0a1118;  
+    --columna-azul: #121e2a;       
+    --tarjeta-azul: #1b2a3a;       
+    --por-hacer: #a5d8ff;          
+    --en-desarrollo: #228be6;     
+    --terminada: #74c0fc;         
+    --texto-blanco: #e9ecef;       
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -9,13 +19,13 @@ body {
     justify-content: center;
     align-items: center;
     font-family: 'Poppins', sans-serif;
-    background-color: #ffffff;
+    background-color: var(--fondo-azul-oscuro);
 }
 
 .main-title {
     font-family: 'Orbitron', sans-serif;
-    color: black;
-    text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+    color: var(--por-hacer);
+    text-shadow: 0 0 10px rgba(34, 139, 230, 0.4);
     margin-bottom: 30px;
     font-size: 2rem;
     text-align: center;
@@ -23,19 +33,19 @@ body {
 }
 
 .container {
-    background: #ffffff;
+    background: var(--columna-azul);
     padding: 3rem;
     border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
     width: 380px;
     text-align: center;
-    border: 1px solid #eeeeee;
+    border: 1px solid rgba(34, 139, 230, 0.1);
     transition: 0.4s;
 }
 
 .container:hover {
-    border-color: #00ff88;
-    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.15);
+    border-color: var(--en-desarrollo);
+    box-shadow: 0 10px 30px rgba(34, 139, 230, 0.25);
 }
 
 .icon-container {
@@ -48,7 +58,7 @@ body {
 }
 
 h2 { 
-    color: #333333; 
+    color: var(--texto-blanco); 
     font-family: 'Orbitron', sans-serif;
     margin-bottom: 2rem; 
     letter-spacing: 5px;
@@ -58,22 +68,22 @@ input {
     width: 100%;
     padding: 15px;
     margin: 12px 0;
-    border: 1px solid #dddddd;
+    border: 1px solid rgba(34, 139, 230, 0.2);
     border-radius: 10px;
-    background: #f9f9f9;
-    color: #333333;
+    background: var(--tarjeta-azul);
+    color: var(--texto-blanco);
     font-size: 1rem;
     transition: 0.3s;
     box-sizing: border-box;
 }
 
-input::placeholder { color: #999999; }
+input::placeholder { color: #6272a4; }
 
 input:focus {
     outline: none;
-    border-color: #00ff88;
-    background: #ffffff;
-    box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+    border-color: var(--por-hacer);
+    background: var(--tarjeta-azul);
+    box-shadow: 0 0 10px rgba(165, 216, 255, 0.3);
 }
 
 .btn-login {
@@ -85,23 +95,23 @@ input:focus {
     font-weight: bold;
     font-size: 1.1rem;
     font-family: 'Orbitron', sans-serif;
-    background: #00ff88; 
-    color: #000; 
+    background: var(--en-desarrollo); 
+    color: #ffffff; 
     margin-top: 1.5rem;
     transition: 0.3s;
-    box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+    box-shadow: 0 5px 15px rgba(34, 139, 230, 0.4);
 }
 
 .btn-login:hover {
-    background: #00cc6e;
+    background: #1c7ed6;
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 255, 136, 0.4);
+    box-shadow: 0 8px 20px rgba(34, 139, 230, 0.6);
 }
 
 .btn-login:active { transform: scale(0.95); }
 
-.footer-links { margin-top: 2rem; color: #666666; }
+.footer-links { margin-top: 2rem; color: #ced4da; }
 
-a { color: #00cc6e; text-decoration: none; font-weight: bold; }
+a { color: var(--terminada); text-decoration: none; font-weight: bold; }
 
 a:hover { text-decoration: underline; }
