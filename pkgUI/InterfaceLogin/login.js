@@ -22,17 +22,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (respuesta.ok) {
                     const usuario = await respuesta.json();
                     
-                    // Nota: C# suele serializar a minúsculas en JSON (name en vez de Name)
-                    alert("👋 ¡Hola de nuevo, " + (usuario.name || usuario.nombre) + "!");
+                    // C# serializa las propiedades a minúsculas en JSON (nombre/name y rol)
+                    const nombreUsuario = usuario.nombre || usuario.name || "Usuario";
+                    const rolUsuario = usuario.rol || usuario.rolEnum;
+
+                    alert("👋 ¡Hola de nuevo, " + nombreUsuario + "!");
                     
-                    // Redirección según Rol
-                    if (usuario.rol === "Developer") {
-                        window.location.href = "../InterfaceDeveloper/developer.html";
-                    } else if (usuario.rol === "Admin") {
-                        window.location.href = "../InterfaceAdmin/admin.html";
+                    console.log("Rol recibido del servidor:", rolUsuario);
+
+                    // ==========================================
+                    // 🛠️ RUTAS VIRTUALES CORREGIDAS PARA .NET
+                    // ==========================================
+                    if (rolUsuario === "Developer") {
+                        window.location.href = "/pkgUI/InterfaceDeveloper/developer.html";
+                    } else if (rolUsuario === "Admin") {
+                        window.location.href = "/pkgUI/InterfaceAdmin/admin.html";
                     } else {
-                        window.location.href = "../InterfaceLeader/leader.html";
+                        window.location.href = "/pkgUI/InterfaceLeader/leader.html";
                     }
+                    // ==========================================
+
                 } else {
                     alert("❌ Nombre o contraseña incorrectos");
                 }
