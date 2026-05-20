@@ -1,12 +1,26 @@
 /*==============================================================*/
+/* INSERTS TABLA: ESTADO                                        */
+/*==============================================================*/
+
+INSERT INTO ESTADO (ID_ESTADO, NOMBRE)
+VALUES ('E1', 'ToDevelop');
+
+INSERT INTO ESTADO (ID_ESTADO, NOMBRE)
+VALUES ('E2', 'InDevelopment');
+
+INSERT INTO ESTADO (ID_ESTADO, NOMBRE)
+VALUES ('E3', 'Finished');
+
+
+/*==============================================================*/
 /* INSERTS TABLA: ROL                                           */
 /*==============================================================*/
 
 INSERT INTO ROL (ID_ROL, NOMBRE)
-VALUES ('R1', 'Admin');
+VALUES ('R1', 'Administrator');
 
 INSERT INTO ROL (ID_ROL, NOMBRE)
-VALUES ('R2', 'Manager');
+VALUES ('R2', 'ProjectManager');
 
 INSERT INTO ROL (ID_ROL, NOMBRE)
 VALUES ('R3', 'Developer');
@@ -33,7 +47,7 @@ VALUES
    'Sistema para ventas',
    DATE '2026-01-10',
    DATE '2026-06-30',
-   'En progreso',
+   'InDevelopment',
    45
 );
 
@@ -45,7 +59,7 @@ VALUES
    'Control de inventario',
    DATE '2026-02-01',
    DATE '2026-08-15',
-   'Pendiente',
+   'ToDevelop',
    10
 );
 
@@ -57,7 +71,7 @@ VALUES
    'Gestion de empleados',
    DATE '2026-03-01',
    DATE '2026-09-20',
-   'En progreso',
+   'InDevelopment',
    35
 );
 
@@ -69,7 +83,7 @@ VALUES
    'Control medico',
    DATE '2026-01-15',
    DATE '2026-12-01',
-   'Atrasado',
+   'InDevelopment',
    20
 );
 
@@ -81,9 +95,10 @@ VALUES
    'Gestion estudiantil',
    DATE '2026-04-01',
    DATE '2026-11-30',
-   'Finalizado',
+   'Finished',
    100
 );
+
 
 /*==============================================================*/
 /* INSERTS TABLA: USUARIO                                       */
@@ -105,7 +120,7 @@ VALUES
 (
    'U2',
    'Sebas',
-   'Developer backend',
+   'Project manager backend',
    'sebas@gmail.com',
    'abcdef',
    'R2'
@@ -116,7 +131,7 @@ VALUES
 (
    'U3',
    'Laura',
-   'Tester principal',
+   'Developer frontend',
    'laura@gmail.com',
    'pass123',
    'R3'
@@ -138,11 +153,12 @@ VALUES
 (
    'U5',
    'Ana',
-   'Cliente del sistema',
+   'Backend developer',
    'ana@gmail.com',
    'cliente',
-   'R1'
+   'R3'
 );
+
 
 /*==============================================================*/
 /* INSERTS TABLA: TAREA                                         */
@@ -155,7 +171,11 @@ VALUES
    'Login',
    'Implementar login',
    DATE '2026-01-15',
-   DATE '2026-01-30'
+   DATE '2026-01-30',
+   'E2',
+   'P1',
+   'U2',
+   'U3'
 );
 
 INSERT INTO TAREA
@@ -165,7 +185,11 @@ VALUES
    'CRUD Productos',
    'Gestion productos',
    DATE '2026-02-01',
-   DATE '2026-02-20'
+   DATE '2026-02-20',
+   'E1',
+   'P2',
+   'U4',
+   'U5'
 );
 
 INSERT INTO TAREA
@@ -175,7 +199,11 @@ VALUES
    'Dashboard',
    'Panel administrativo',
    DATE '2026-02-10',
-   DATE '2026-03-01'
+   DATE '2026-03-01',
+   'E2',
+   'P1',
+   'U2',
+   'U5'
 );
 
 INSERT INTO TAREA
@@ -185,7 +213,11 @@ VALUES
    'Reportes PDF',
    'Generacion de reportes',
    DATE '2026-03-05',
-   DATE '2026-03-25'
+   DATE '2026-03-25',
+   'E3',
+   'P3',
+   'U4',
+   'U3'
 );
 
 INSERT INTO TAREA
@@ -195,8 +227,13 @@ VALUES
    'Seguridad',
    'Control de permisos',
    DATE '2026-03-15',
-   DATE '2026-04-10'
+   DATE '2026-04-10',
+   'E2',
+   'P4',
+   'U2',
+   'U5'
 );
+
 
 /*==============================================================*/
 /* INSERTS TABLA: REPORTES                                      */
