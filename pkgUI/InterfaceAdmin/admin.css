@@ -1,112 +1,130 @@
+:root {
+    --fondo-azul-oscuro: #050a12;
+    --card-bg: #0b1521;
+    --input-bg: #121e2a;
+    --acento-azul: #4da6ff;
+    --acento-verde: #2ecc71;
+    --texto-blanco: #ffffff;
+}
+
 body { 
     font-family: 'Segoe UI', sans-serif; 
-    /* Fondo oscuro cyberpunk general */
-    background: #0b0f19; 
-    margin: 0; 
+    background: var(--fondo-azul-oscuro); 
+    color: var(--texto-blanco);
     padding: 20px; 
 }
 
 .admin-grid { 
     display: grid; 
     grid-template-columns: 1fr 1fr; 
-    gap: 20px; 
+    gap: 25px; 
     max-width: 1100px; 
     margin: auto; 
 }
 
-/* Tarjetas transformadas en paneles oscuros con brillo sutil */
 .card { 
-    background: #111827; 
+    background: var(--card-bg); 
     padding: 25px; 
-    border-radius: 12px; 
-    border: 1px solid rgba(34, 139, 230, 0.15);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 15px rgba(34, 139, 230, 0.05); 
+    border-radius: 16px; 
+    border: 1px solid rgba(77, 166, 255, 0.2);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
 }
 
-/* Título con el azul eléctrico principal */
 h2 { 
-    color: #228be6; 
+    color: var(--acento-azul); 
     font-size: 1.4rem; 
     margin-top: 0; 
-    text-shadow: 0 0 10px rgba(34, 139, 230, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(77, 166, 255, 0.5);
 }
 
-/* Inputs oscurecidos que integran perfectamente con la UI */
+label {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #a0aec0;
+}
+
 input, textarea { 
     width: 100%; 
-    padding: 10px; 
+    padding: 12px; 
     margin: 8px 0; 
-    background-color: #1f2937;
-    color: #ffffff;
-    border: 1px solid rgba(34, 139, 230, 0.25); 
-    border-radius: 6px; 
+    background-color: var(--input-bg);
+    color: var(--texto-blanco);
+    border: 1px solid rgba(77, 166, 255, 0.3); 
+    border-radius: 8px; 
     box-sizing: border-box; 
     transition: all 0.3s ease;
 }
 
 input:focus, textarea:focus {
     outline: none;
-    border-color: #228be6;
-    box-shadow: 0 0 8px rgba(34, 139, 230, 0.4);
+    border-color: var(--acento-azul);
+    box-shadow: 0 0 15px rgba(77, 166, 255, 0.4);
 }
 
-textarea { height: 60px; }
+textarea { height: 80px; }
 
-/* Botón principal adaptado al color interactivo de tu proyecto */
 .btn-primary { 
     width: 100%; 
-    padding: 12px; 
-    background: #228be6; 
-    color: white; 
+    padding: 14px; 
+    background: var(--acento-azul); 
+    color: #000; 
     border: none; 
-    border-radius: 6px; 
+    border-radius: 8px; 
     cursor: pointer; 
     font-weight: bold; 
-    box-shadow: 0 0 10px rgba(34, 139, 230, 0.2);
+    font-size: 1rem;
+    box-shadow: 0 0 15px rgba(77, 166, 255, 0.4);
     transition: all 0.3s ease;
+    margin-top: 10px;
 }
 
 .btn-primary:hover {
-    background-color: #1c7ed6;
-    box-shadow: 0 0 20px #228be6, 0 0 30px rgba(34, 139, 230, 0.5);
-    transform: scale(1.01);
+    background: #ffffff;
+    box-shadow: 0 0 25px rgba(77, 166, 255, 0.8);
+    transform: translateY(-2px);
 }
 
 /* ==========================================
-   CÍRCULO DE PORCENTAJE (Estilo Neón)
+   CÍRCULO DE PORCENTAJE NEÓN
    ========================================== */
 .progress-circle {
-    width: 120px; 
-    height: 120px; 
+    width: 140px; 
+    height: 140px; 
     border-radius: 50%;
-    /* Mantenemos tu conic-gradient pero cambiamos el fondo gris muerto por un azul oscuro apagado */
-    background: conic-gradient(#2ecc71 var(--progress, 0%), #1f2937 0deg);
+    background: conic-gradient(var(--acento-verde) var(--progress, 75%), #121e2a 0deg);
     display: flex; 
     align-items: center; 
     justify-content: center;
     margin: 20px auto; 
     position: relative;
-    /* Efecto de resplandor para el progreso verde */
-    filter: drop-shadow(0 0 8px rgba(46, 204, 113, 0.4));
+    filter: drop-shadow(0 0 15px rgba(46, 204, 113, 0.5));
 }
 
-/* El círculo interno del porcentaje */
 .progress-circle span {
-    width: 100px; 
-    height: 100px; 
-    /* Fondo que coincide con la tarjeta */
-    background: #111827; 
+    width: 110px; 
+    height: 110px; 
+    background: var(--card-bg); 
     border-radius: 50%;
     display: flex; 
     align-items: center; 
     justify-content: center;
-    font-size: 1.5rem; 
+    font-size: 1.8rem; 
     font-weight: bold; 
-    color: #2ecc71; /* Verde neón brillante para las métricas completadas */
-    text-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
+    color: var(--acento-verde); 
+    text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+}
+
+.stats-section p {
+    text-align: center;
+    color: #a0aec0;
 }
 
 .chart-container { 
-    margin-top: 20px; 
-    height: 250px; 
+    margin-top: 30px; 
+    padding: 10px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
 }

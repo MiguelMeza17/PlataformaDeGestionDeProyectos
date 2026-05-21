@@ -1,81 +1,106 @@
+:root {
+    --fondo-azul-oscuro: #050a12;
+    --card-bg: #0b1521;
+    --input-bg: #121e2a;
+    --acento-azul: #4da6ff;
+    --texto-blanco: #ffffff;
+    --texto-secundario: #94a3b8;
+}
+
 body {
     font-family: 'Segoe UI', sans-serif;
-    /* Cambio a fondo oscuro cyberpunk */
-    background-color: #0b0f19; 
+    background-color: var(--fondo-azul-oscuro);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
+    color: var(--texto-blanco);
 }
 
 .container {
-    /* Fondo oscuro traslúcido para los paneles */
-    background: #111827; 
-    padding: 2rem;
-    border-radius: 12px;
-    /* Borde sutil y sombra con el resplandor azul característico */
-    border: 1px solid rgba(34, 139, 230, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(34, 139, 230, 0.1);
+    background: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(77, 166, 255, 0.3);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
     width: 450px;
 }
 
-/* El título ahora lleva el azul brillante del proyecto */
-h2 { 
-    color: #228be6; 
-    margin-top: 0; 
-    text-shadow: 0 0 10px rgba(34, 139, 230, 0.3);
+h2 {
+    color: var(--acento-azul);
+    margin-top: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 15px rgba(77, 166, 255, 0.6);
+    font-size: 1.5rem;
 }
 
-/* Campos de texto oscurecidos que combinan con el ChatBot input */
+p {
+    color: var(--texto-secundario);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+/* Etiquetas y campos */
+label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--texto-secundario);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
 input, textarea, select {
     width: 100%;
     padding: 12px;
-    margin: 10px 0;
-    background-color: #1f2937;
-    color: #ffffff;
-    border: 1px solid rgba(34, 139, 230, 0.3);
-    border-radius: 6px;
+    margin: 8px 0 15px 0;
+    background-color: var(--input-bg);
+    color: var(--texto-blanco);
+    border: 1px solid rgba(77, 166, 255, 0.3);
+    border-radius: 8px;
     box-sizing: border-box;
     transition: all 0.3s ease;
 }
 
-/* Efecto Focus para cuando el usuario hace clic en un input */
+/* Corrección de color para las opciones del select */
+select option {
+    background-color: var(--input-bg);
+    color: var(--texto-blanco);
+}
+
 input:focus, textarea:focus, select:focus {
     outline: none;
-    border-color: #228be6;
-    box-shadow: 0 0 8px rgba(34, 139, 230, 0.5);
+    border-color: var(--acento-azul);
+    background: #1a2a3a;
+    box-shadow: 0 0 15px rgba(77, 166, 255, 0.5);
 }
 
 textarea { height: 80px; resize: none; }
 
-.row { display: flex; gap: 10px; }
-/* Etiquetas de texto sutiles */
-.field { 
-    flex: 1; 
-    text-align: left; 
-    font-size: 0.8rem; 
-    color: #9ca3af; 
-}
+.row { display: flex; gap: 15px; }
+.field { flex: 1; }
 
-/* El botón de envío con el estilo interactivo de tu interfaz */
 .btn-send {
     width: 100%;
     padding: 14px;
-    background-color: #228be6;
-    color: white;
+    background-color: var(--acento-azul);
+    color: #050a12;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: bold;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     cursor: pointer;
     margin-top: 10px;
-    box-shadow: 0 0 10px rgba(34, 139, 230, 0.3);
-    transition: 0.3s;
+    box-shadow: 0 0 20px rgba(77, 166, 255, 0.4);
+    transition: all 0.3s ease;
 }
 
-/* Efecto Hover del botón */
-.btn-send:hover { 
-    background-color: #1c7ed6; 
-    box-shadow: 0 0 20px #228be6, 0 0 30px rgba(34, 139, 230, 0.6);
-    transform: scale(1.02);
+.btn-send:hover {
+    background-color: #ffffff;
+    box-shadow: 0 0 30px rgba(77, 166, 255, 0.8);
+    transform: translateY(-2px);
 }
