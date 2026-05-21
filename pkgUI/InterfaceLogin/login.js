@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const usuario = await respuesta.json();
                     
                     const nombreUsuario = usuario.nombre || "Usuario";
+                    
+                    localStorage.setItem("nombreUsuario", nombreUsuario);
+
                     const rolId = usuario.rolId;
 
                     alert("👋 ¡Hola de nuevo, " + nombreUsuario + "!");

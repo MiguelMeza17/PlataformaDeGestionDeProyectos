@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
+
+    const nombreUsuario = localStorage.getItem("nombreUsuario") || "Usuario";
+
     const zona = document.getElementById("esdeathZona");
     const chat = document.getElementById("esdeathChat");
     const textoSaludo = document.getElementById("esdeathSaludo");
@@ -10,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const imagenSeria = "/Imagenes/ImagenSeria.png";
     const imagenPensando = "/Imagenes/ImagenPensando.png"
     const imagenGritando = "/Imagenes/ImagenPensando.png"
+    const imagenDespidiendoce = "/Imagenes/ImagenDespidiendoce.png"
 
     const saludos = [
         "¡Saludos, subordinado!",
@@ -74,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
             (query.includes('saludos'))
         ) {
             return {
-                texto: "¡Hola! ¿En qué puedo ayudarte hoy?",
+                texto: "¡Hola " + nombreUsuario + "! ¿En qué puedo ayudarte hoy?",
                 imagen: imagenPensando
             };
         }
@@ -321,8 +325,8 @@ document.addEventListener("DOMContentLoaded", () => {
             (query.includes('chao'))
         ) {
             return {
-                texto: "¡Hasta luego! Mucha suerte con tu proyecto.",
-                imagen: imagenPensando
+                texto: "¡Hasta luego! " + nombreUsuario +" Mucha suerte con tu proyecto.",
+                imagen: imagenDespidiendoce
             };
         }
 
