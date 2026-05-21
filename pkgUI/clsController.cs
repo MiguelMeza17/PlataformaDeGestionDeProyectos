@@ -49,11 +49,11 @@ namespace GestionDeProyectos.pkgUI
             return attInstance;
         }
 
-        public clsStakeholder opLoginStakeholder(string prmName, string prmPassword)
+        public clsStakeholder opLoginStakeholder(string prmEmail, string prmPassword)
         {
             foreach (clsStakeholder varObj in attStakeholders)
             {
-                if (varObj.opCompareCredentials(prmName, prmPassword))
+                if (varObj.opCompareCredentials(prmEmail, prmPassword))
                 {
                     return varObj;
                 }
@@ -62,7 +62,7 @@ namespace GestionDeProyectos.pkgUI
         }
 
         public bool opRegisterProject(
-            string prmOUID,
+            int prmOUID,
             string prmName,
             string prmDescription,
             DateTime prmStartingDate,
@@ -88,7 +88,7 @@ namespace GestionDeProyectos.pkgUI
         }
 
         public bool opRegisterStakeholder(
-            string prmOUID,
+            int prmOUID,
             string prmName,
             string prmDescription,
             string prmEmail,
@@ -113,7 +113,7 @@ namespace GestionDeProyectos.pkgUI
         }
 
         public bool opRegisterTask(
-            string prmOUID,
+            int prmOUID,
             string prmName,
             string prmDescription,
             DateTime prmFirstDate,
@@ -134,8 +134,8 @@ namespace GestionDeProyectos.pkgUI
             return opAssociateTask(newTask);
         }
         public bool opRegisterReport(
-            string prmProjectOUID,
-            string prmOUID,
+            int prmProjectOUID,
+            int prmOUID,
             string prmName,
             string prmDescription,
             DateTime prmDate,
@@ -158,7 +158,7 @@ namespace GestionDeProyectos.pkgUI
         }
 
         public bool opUpdateProject(
-            string prmOUID,
+            int prmOUID,
             string prmName,
             string prmDescription,
             DateTime prmStartingDate,
@@ -181,7 +181,7 @@ namespace GestionDeProyectos.pkgUI
             );
         }
         public bool opUpdateStakeholder(
-            string prmOUID,
+            int prmOUID,
             string prmName,
             string prmDescription,
             string prmEmail,
@@ -202,7 +202,7 @@ namespace GestionDeProyectos.pkgUI
             );
         }
         public bool opUpdateTask(
-            string prmOUID,
+            int prmOUID,
             string prmName,
             string prmDescription,
             DateTime prmFirstDate,
@@ -221,8 +221,8 @@ namespace GestionDeProyectos.pkgUI
             );
         }
         public bool opUpdateReport(
-            string prmProjectOUID,
-            string prmOUID,
+            int prmProjectOUID,
+            int prmOUID,
             string prmName,
             string prmDescription,
             DateTime prmDate,
@@ -243,21 +243,21 @@ namespace GestionDeProyectos.pkgUI
                 prmRetardedTasks
             );
         }
-        public bool opDeleteProject(string prmOUID)
+        public bool opDeleteProject(int prmOUID)
         {
             clsProject varObj = opGetProject(prmOUID);
             if(varObj == null) return false;
             if(!varObj.opDie()) return false;
             return opDisassociateProject(varObj);
         }
-        public bool opDeleteStakeholder(string prmOUID)
+        public bool opDeleteStakeholder(int prmOUID)
         {
             clsStakeholder varObj = opGetStakeholder(prmOUID);
             if(varObj == null) return false;
             if(!varObj.opDie()) return false;
             return opDisassociateStakeholder(varObj);
         }
-        public bool opDeleteTask(string prmOUID)
+        public bool opDeleteTask(int prmOUID)
         {
             clsTask varObj = opGetTask(prmOUID);
             if(varObj == null) return false;
@@ -265,8 +265,8 @@ namespace GestionDeProyectos.pkgUI
             return opDisassociateTask(varObj);
         }
         public bool opDeleteReport(
-            string prmProjectOUID,
-            string prmOUID)
+            int prmProjectOUID,
+            int prmOUID)
         {
             clsProject varObj = opGetProject(prmProjectOUID);
             if(varObj == null) return false;
@@ -304,17 +304,17 @@ namespace GestionDeProyectos.pkgUI
         {
             return clsBrockerCrud.opDisassociateItemFrom(prmObj, attTasks);
         }
-        public clsProject opGetProject(string prmOUID)
+        public clsProject opGetProject(int prmOUID)
         {
             return clsBrockerCrud.opGetItem(prmOUID, attProjects);
         }
 
-        public clsStakeholder opGetStakeholder(string prmOUID)
+        public clsStakeholder opGetStakeholder(int prmOUID)
         {
             return clsBrockerCrud.opGetItem(prmOUID, attStakeholders);
         }
 
-        public clsTask opGetTask(string prmOUID)
+        public clsTask opGetTask(int prmOUID)
         {
             return clsBrockerCrud.opGetItem(prmOUID, attTasks);
         }

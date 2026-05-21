@@ -9,7 +9,7 @@ namespace GestionDeProyectos.pkgDomain
         private List<clsTask> attTasks;
 
         public clsStakeholder(
-            string prmOUID, 
+            int prmOUID, 
             string prmName, 
             string prmDescription, 
             string prmEmail, 
@@ -20,9 +20,11 @@ namespace GestionDeProyectos.pkgDomain
             attRol = prmRol;
             attTasks = new List<clsTask>();
         } 
-        public bool opCompareCredentials(string prmName, string prmPassword)
+        public string GetNombre() { return attName; }
+        public clsRoles GetRol() { return attRol; }
+        public bool opCompareCredentials(string prmEmail, string prmPassword)
         {
-            return attName.Trim() == prmName.Trim() && attPassword == prmPassword;
+            return attEmail.Trim() == prmEmail.Trim() && attPassword == prmPassword;
         }
         public bool opModify(
             string prmName,

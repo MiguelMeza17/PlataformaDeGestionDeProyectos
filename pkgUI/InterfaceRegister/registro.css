@@ -2,21 +2,19 @@
 
 body {
     margin: 0;
-    padding: 0;
-    height: 100vh;
+    padding: 20px;
+    min-height: 100vh;
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     font-family: 'Poppins', sans-serif;
-    /* TRANSFORMADO: Fondo oscuro profundo en lugar del blanco */
-    background-color: #0b0f19; 
+    background-color: #0b0f19;
 }
 
 .main-title {
     font-family: 'Orbitron', sans-serif;
-    /* Color verde neón puro y brillante para destacar sobre el fondo oscuro */
-    color: #00ff88; 
+    color: #00ff88;
     text-shadow: 0 0 15px rgba(0, 255, 136, 0.6), 0 0 30px rgba(0, 255, 136, 0.2);
     margin-bottom: 20px;
     font-size: 1.8rem;
@@ -25,14 +23,13 @@ body {
 }
 
 .container {
-    /* Fondo del contenedor ahora es un panel traslúcido oscuro */
     background: #111827;
     padding: 2.5rem;
     border-radius: 20px;
-    /* Borde sutil y sombra con resplandor verde característico */
     border: 1px solid rgba(0, 255, 136, 0.15);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 255, 136, 0.05);
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
     text-align: center;
     transition: 0.4s ease;
 }
@@ -46,21 +43,18 @@ body {
     width: 60px;
     height: 60px;
     margin-bottom: 10px;
-    /* Efecto de brillo para el icono si es un PNG transparente */
     filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.4));
 }
 
-h2 { 
-    /* Texto principal ahora es blanco para legibilidad */
-    color: #ffffff; 
+h2 {
+    color: #ffffff;
     font-family: 'Orbitron', sans-serif;
-    margin-bottom: 1.5rem; 
+    margin-bottom: 1.5rem;
     letter-spacing: 3px;
     font-size: 1.4rem;
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
 }
 
-/* Campos de entrada oscurecidos que integran perfectamente */
 input, select {
     width: 100%;
     padding: 12px;
@@ -75,7 +69,10 @@ input, select {
     font-family: 'Poppins', sans-serif;
 }
 
-/* Modificamos las opciones de la lista desplegable (Select) para que no salgan blancas */
+input::placeholder {
+    color: #9ca3af;
+}
+
 select option {
     background-color: #111827;
     color: #ffffff;
@@ -97,8 +94,8 @@ input:focus, select:focus {
     font-weight: bold;
     font-size: 1rem;
     font-family: 'Orbitron', sans-serif;
-    background: #00ff88; 
-    color: #000; 
+    background: #00ff88;
+    color: #000;
     margin-top: 1.2rem;
     transition: 0.3s;
     box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
@@ -110,23 +107,22 @@ input:focus, select:focus {
     box-shadow: 0 8px 25px rgba(0, 255, 136, 0.6), 0 0 15px #00ff88;
 }
 
-.footer-links { 
-    margin-top: 1.5rem; 
-    /* Color de texto secundario atenuado */
-    color: #9ca3af; 
+.footer-links {
+    margin-top: 1.5rem;
+    color: #9ca3af;
     font-size: 0.85rem;
 }
 
-a { 
-    color: #00ff88; 
-    text-decoration: none; 
-    font-weight: bold; 
+a {
+    color: #00ff88;
+    text-decoration: none;
+    font-weight: bold;
     text-shadow: 0 0 5px rgba(0, 255, 136, 0.2);
     transition: 0.3s;
 }
 
-a:hover { 
+a:hover {
     color: #00ffaa;
-    text-decoration: underline; 
+    text-decoration: underline;
     text-shadow: 0 0 10px #00ff88;
 }

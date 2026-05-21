@@ -6,11 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             const credenciales = {
-                nombre: document.getElementById('nombreLogin').value, 
+                nombre: document.getElementById('emailLogin').value,
                 password: document.getElementById('passLogin').value
             };
-
-            console.log("Intentando entrar con:", credenciales.nombre);
 
             try {
                 const respuesta = await fetch('http://localhost:5000/api/login', {
@@ -22,28 +20,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (respuesta.ok) {
                     const usuario = await respuesta.json();
                     
-                    // C# serializa las propiedades a minúsculas en JSON (nombre/name y rol)
-                    const nombreUsuario = usuario.nombre || usuario.name || "Usuario";
-                    const rolUsuario = usuario.rol || usuario.rolEnum;
+                    const nombreUsuario = usuario.nombre || "Usuario";
+                    const rolId = usuario.rolId;
 
                     alert("👋 ¡Hola de nuevo, " + nombreUsuario + "!");
-                    
-                    console.log("Rol recibido del servidor:", rolUsuario);
 
-                    // ==========================================
-                    // 🛠️ RUTAS VIRTUALES CORREGIDAS PARA .NET
-                    // ==========================================
-                    if (rolUsuario === "Developer") {
-                        window.location.href = "/pkgUI/InterfaceDeveloper/developer.html";
-                    } else if (rolUsuario === "Admin") {
+                    if (rolId === 0) {
                         window.location.href = "/pkgUI/InterfaceAdmin/admin.html";
-                    } else {
+                    } else if (rolId === 1) {
                         window.location.href = "/pkgUI/InterfaceLeader/leader.html";
+                    } else if (rolId === 2) {
+                        window.location.href = "/pkgUI/InterfaceDeveloper/developer.html";
                     }
-                    // ==========================================
-
                 } else {
-                    alert("❌ Nombre o contraseña incorrectos");
+                    alert("❌ Correo o contraseña incorrectos");
                 }
             } catch (error) {
                 console.error("Error en login:", error);

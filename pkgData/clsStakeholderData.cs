@@ -7,7 +7,7 @@ namespace GestionDeProyectos.pkgData
 {
     public class clsStakeholderData
     {
-        public static void opLoadStakeholders(Action<string, string, string, string, string, string> prmRegisterAction)
+        public static void opLoadStakeholders(Action<int, string, string, string, string, string> prmRegisterAction)
         {
             string vrmQuery = "SELECT ID_USUARIO, NOMBRE, DESCRIPCION, CORREO, CONTRASENA, ID_ROL FROM USUARIO";
 
@@ -23,7 +23,7 @@ namespace GestionDeProyectos.pkgData
                         {
                             while (vrmReader.Read())
                             {
-                                string vrmIDUsuario = vrmReader["ID_USUARIO"].ToString();
+                                int vrmIDUsuario = Convert.ToInt32(vrmReader["ID_USUARIO"]);
                                 string vrmNombre = vrmReader["NOMBRE"].ToString();
                                 
                                 string vrmDescripcion = vrmReader["DESCRIPCION"] == DBNull.Value

@@ -22,7 +22,7 @@ namespace GestionDeProyectos.pkgSystem
             return prmCollection.Remove(prmObj);
         }
 
-        public static ItemType opGetItem<ItemType>(string prmOUID, List<ItemType> prmCollection) where ItemType : clsEntity
+        public static ItemType opGetItem<ItemType>(int prmOUID, List<ItemType> prmCollection) where ItemType : clsEntity
         {
             foreach (ItemType varObj in prmCollection)
             {

@@ -9,7 +9,7 @@ namespace GestionDeProyectos.pkgDomain
         private int attRetardedTasks;
 
         public clsReport(
-            string prmOUID, 
+            int prmOUID, 
             string prmName, 
             string prmDescription, 
             DateTime prmDate, 

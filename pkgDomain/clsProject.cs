@@ -14,7 +14,7 @@ namespace GestionDeProyectos.pkgDomain
       private List<clsReport> attReports = new List<clsReport>();
 
       public clsProject(
-         string prmOUID,
+         int prmOUID,
          string prmName,
          string prmDescription,
          DateTime prmStartingDate,
@@ -32,7 +32,7 @@ namespace GestionDeProyectos.pkgDomain
       }
 
       public bool opRegisterReport(
-         string prmOUID,
+         int prmOUID,
          string prmName,
          string prmDescription,
          DateTime prmDate,
@@ -55,7 +55,7 @@ namespace GestionDeProyectos.pkgDomain
          return opAssociateReport(newReport);
       }
       public bool opUpdateReport(
-         string prmOUID,
+         int prmOUID,
          string prmName,
          string prmDescription,
          DateTime prmDate,
@@ -74,7 +74,7 @@ namespace GestionDeProyectos.pkgDomain
                prmRetardedTasks);
       }
       public bool opDeleteReport(
-            string prmOUID)
+            int prmOUID)
         {
             clsReport varObj = opGetReport(prmOUID);
             if(varObj == null) return false;
@@ -90,7 +90,7 @@ namespace GestionDeProyectos.pkgDomain
       {
          return clsBrockerCrud.opDisassociateItemFrom(prmObj, attReports);
       }
-      public clsReport opGetReport(string prmOUID)
+      public clsReport opGetReport(int prmOUID)
       {
          return clsBrockerCrud.opGetItem(prmOUID, attReports);
       }

@@ -8,7 +8,7 @@ namespace GestionDeProyectos.pkgDomain
       private DateTime attLimitDate;
 
       public clsTask(
-         string prmOUID,
+         int prmOUID,
          string prmName,
          string prmDescription,
          DateTime prmFirstDate,

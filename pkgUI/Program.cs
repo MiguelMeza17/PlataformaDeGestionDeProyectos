@@ -1,9 +1,9 @@
 ﻿using System;
-using System.IO; // <-- Agregado para poder manejar rutas de archivos
+using System.IO;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders; // <-- Agregado para el mapeo de carpetas
+using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http;
 using GestionDeProyectos.pkgDomain;
 using GestionDeProyectos.pkgUI;
@@ -29,33 +29,34 @@ builder.Services.ConfigureHttpJsonOptions(options => {
 var app = builder.Build();
 app.UseCors();
 
-// ==========================================
-// 🚨 CORRECCIÓN 1: ACTIVAR TUS ARCHIVOS HTML/CSS/JS
-// ==========================================
-// Obtenemos la ruta real de tu proyecto en la computadora
 string proyectoRaiz = Directory.GetCurrentDirectory(); 
 string rutaPkgUI = Path.Combine(proyectoRaiz, "pkgUI");
 
-// Le decimos a .NET que exponga públicamente la carpeta pkgUI
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(rutaPkgUI),
     RequestPath = "/pkgUI" 
 });
-// ==========================================
 
 app.MapPost("/api/registrar", (UsuarioRegistroDTO datos) => {
     try 
     {
         var controlador = clsController.opGetInstance();
 
-        if (!Enum.TryParse(datos.rol, true, out clsRoles rolEnum))
+        if (!int.TryParse(datos.id, out int idConvertido))
         {
-            return Results.BadRequest(new { mensaje = "El rol proporcionado no existe en el sistema." });
+            return Results.BadRequest(new { mensaje = "El ID debe ser un número entero válido." });
         }
 
+        if (!int.TryParse(datos.rol, out int rolInt))
+        {
+            return Results.BadRequest(new { mensaje = "El rol debe ser un número (0, 1 o 2)." });
+        }
+
+        clsRoles rolEnum = (clsRoles)rolInt;
+
         bool exito = controlador.opRegisterStakeholder(
-            datos.id, 
+            idConvertido, 
             datos.nombre, 
             "Registro desde Web", 
             datos.email, 
@@ -82,11 +83,10 @@ app.MapPost("/api/login", (LoginDTO datos) => {
         var usuario = controlador.opLoginStakeholder(datos.nombre, datos.password);
 
         if (usuario != null) {
-            // ==========================================
-            // 🚨 CORRECCIÓN 2: ENVIAR EL USUARIO CON SU ROL EN EL JSON
-            // ==========================================
-            // Retornamos tanto el mensaje como el objeto usuario (que contiene .rol o .nombre)
-            return Results.Ok(usuario); 
+            return Results.Ok(new {
+                nombre = usuario.GetNombre(),
+                rolId = (int)usuario.GetRol()
+            });
         }
         return Results.Json(new { mensaje = "Usuario o contraseña incorrectos" }, statusCode: 401);
     }

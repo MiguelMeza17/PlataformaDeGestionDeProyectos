@@ -21,12 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (respuesta.ok) {
-                    const json = await respuesta.json();
                     alert("✅ Usuario registrado");
                     window.location.href = "../../index.html";
+                } else {
+                    const errorData = await respuesta.json();
+                    alert("❌ Error: " + (errorData.mensaje || "No se pudo registrar el usuario"));
                 }
             } catch (error) {
                 console.error("Error:", error);
+                alert("❌ Error al conectar con el servidor");
             }
         });
     }

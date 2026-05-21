@@ -7,9 +7,10 @@ namespace GestionDeProyectos.pkgData
 {
     public class clsProjectData
     {
+        // Se cambió el primer parámetro de string a int en el Action
         public static void opLoadProjects
         (
-            Action<string, string, string, DateTime, DateTime, string, float> prmRegisterAction
+            Action<int, string, string, DateTime, DateTime, string, float> prmRegisterAction
         )
         {
             string vrmQuery =
@@ -27,28 +28,22 @@ namespace GestionDeProyectos.pkgData
                         {
                             while (vrmReader.Read())
                             {
-                                string vrmIDProyecto =
-                                    vrmReader["ID_PROYECTO"].ToString();
+                                // Corrección: Convertir a int usando Convert.ToInt32
+                                int vrmIDProyecto = Convert.ToInt32(vrmReader["ID_PROYECTO"]);
 
-                                string vrmNombre =
-                                    vrmReader["NOMBRE"].ToString();
+                                string vrmNombre = vrmReader["NOMBRE"]?.ToString() ?? string.Empty;
 
-                                string vrmDescripcion =
-                                    vrmReader["DESCRIPCION"] == DBNull.Value
+                                string vrmDescripcion = vrmReader["DESCRIPCION"] == DBNull.Value
                                     ? string.Empty
                                     : vrmReader["DESCRIPCION"].ToString();
 
-                                DateTime vrmFechaInicio =
-                                    Convert.ToDateTime(vrmReader["FECHA_INICIO"]);
+                                DateTime vrmFechaInicio = Convert.ToDateTime(vrmReader["FECHA_INICIO"]);
 
-                                DateTime vrmFechaFinalizacion =
-                                    Convert.ToDateTime(vrmReader["FECHA_FINALIZACION"]);
+                                DateTime vrmFechaFinalizacion = Convert.ToDateTime(vrmReader["FECHA_FINALIZACION"]);
 
-                                string vrmEstadoGeneral =
-                                    vrmReader["ESTADO_GENERAL"].ToString();
+                                string vrmEstadoGeneral = vrmReader["ESTADO_GENERAL"]?.ToString() ?? string.Empty;
 
-                                float vrmPorcentajeAvance =
-                                    Convert.ToSingle(vrmReader["PORCENTAJE_DE_AVANCE"]);
+                                float vrmPorcentajeAvance = Convert.ToSingle(vrmReader["PORCENTAJE_DE_AVANCE"]);
 
                                 prmRegisterAction(
                                     vrmIDProyecto,
