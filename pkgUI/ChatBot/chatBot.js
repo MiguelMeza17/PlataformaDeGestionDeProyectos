@@ -6,58 +6,426 @@ document.addEventListener("DOMContentLoaded", () => {
     const chat = document.getElementById("esdeathChat");
     const textoSaludo = document.getElementById("esdeathSaludo");
     const inputField = document.querySelector(".esdeath-input");
-    const imageElement = chat.querySelector("img");
+    const imageElement = chat ? chat.querySelector("img") : null;
 
-    
     const imagenSaludo = "/Imagenes/ImagenSaludando.png";
     const imagenSeria = "/Imagenes/ImagenSeria.png";
-    const imagenPensando = "/Imagenes/ImagenPensando.png"
-    const imagenGritando = "/Imagenes/ImagenPensando.png"
-    const imagenDespidiendoce = "/Imagenes/ImagenDespidiendoce.png"
+    const imagenPensando = "/Imagenes/ImagenPensando.png";
+    const imagenGritando = "/Imagenes/ImagenPensando.png";
+    const imagenDespidiendoce = "/Imagenes/ImagenDespidiendoce.png";
 
     const saludos = [
-        "¡Saludos, subordinado!",
-        "¿Cómo progresa el tablero hoy?",
-        "El hielo no tolera la pereza...",
-        "¡Reporta tus avances de inmediato!",
-        "Veo que sigues con vida. Bien."
+        "Hola, subordinado.",
+        "¿Lista para otra jornada de trabajo?",
+        "Estoy observando tu progreso.",
+        "¿Qué tarea realizaremos hoy?",
+        "Bienvenido de nuevo.",
+        "Tu tablero te espera.",
+        "Espero que estés preparado.",
+        "¿Necesitas ayuda con tus tareas?",
+        "El trabajo no se completará solo.",
+        "Comencemos."
     ];
 
-    // Hover
+    const intents = [
+
+        {
+            tag: "solicitar_retroceso",
+            patterns: [
+                "quiero mover la tarea a sin desarrollar",
+                "regresa la tarea a por hacer",
+                "necesito deshacer el estado de desarrollo",
+                "mueve la tarea hacia atrás",
+                "esa tarea no debería estar en desarrollo",
+                "regresa esta tarea a la lista inicial",
+                "quiero quitar esta tarea de en desarrollo",
+                "la tarea debe volver a estar pendiente",
+                "por favor mueve esta tarea a por hacer",
+                "deshacer la acción de desarrollo",
+                "necesito retroceder esta tarea al inicio"
+            ]
+        },
+
+        {
+            tag: "tarea_terminada",
+            patterns: [
+                "he terminado la tarea",
+                "ya completé el trabajo",
+                "tarea finalizada con éxito",
+                "marcar como completada",
+                "he terminado todo",
+                "proceso finalizado",
+                "ya está listo el desarrollo",
+                "ya termine mi tarea",
+                "finalice mi tarea"
+            ]
+        },
+
+        {
+            tag: "despedida",
+            patterns: [
+                "adiós",
+                "hasta luego",
+                "nos vemos después",
+                "me voy ya",
+                "fin del trabajo por hoy",
+                "me retiro",
+                "hasta mañana esdeath",
+                "ya terminé por hoy",
+                "cierra el sistema",
+                "chao"
+            ]
+        },
+
+        {
+            tag: "saludo",
+            patterns: [
+                "hola",
+                "buenos días",
+                "qué tal",
+                "saludos",
+                "hola esdeath",
+                "buenas tardes",
+                "hey",
+                "estoy listo para empezar",
+                "iniciar sesión"
+            ]
+        },
+
+        {
+            tag: "ayuda_orientacion",
+            patterns: [
+                "no sé qué hacer",
+                "estoy perdido",
+                "por dónde empiezo",
+                "qué debo hacer ahora",
+                "ayúdame a empezar",
+                "no sé cómo funciona esto"
+            ]
+        },
+
+        {
+            tag: "tablero_vacio",
+            patterns: [
+                "mi tablero está vacío",
+                "el tablero de desarrollo no tiene nada",
+                "no tengo ninguna tarea en el tablero",
+                "por qué el tablero está vacío",
+                "tengo el tablero vacío qué hago",
+                "no veo tareas en la pantalla",
+                "el tablero no tiene tareas",
+                "no hay nada en mi tablero",
+                "mi pantalla de tareas está vacía",
+                "no tengo trabajo asignado hoy"
+            ]
+        },
+
+        {
+            tag: "usuario_perdido",
+            patterns: [
+                "tengo muchas tareas y no sé por dónde empezar",
+                "estoy abrumado con tantas tareas",
+                "no sé qué tarea debería hacer primero",
+                "tengo demasiado trabajo y estoy perdido",
+                "cómo organizo mis tareas asignadas",
+                "necesito ayuda para priorizar mi trabajo",
+                "no sé cómo manejar mis tareas actuales",
+                "estoy confundido con tantas cosas por hacer",
+                "por cuál tarea debo empezar ahora",
+                "ayuda con la gestión de mis tareas"
+            ]
+        },
+
+        {
+            tag: "consultar_plazo",
+            patterns: [
+                "hasta cuando tengo tiempo para entregar esta tarea",
+                "cuánto tiempo me queda para terminar",
+                "cuándo es la fecha límite de esta tarea",
+                "no sé si alcanzaré a terminar antes de la fecha",
+                "tengo mucho trabajo y no sé si llegue a tiempo",
+                "cuándo vence este pendiente",
+                "estoy ocupado y temo no terminar a tiempo",
+                "cuál es el plazo máximo para completar esto",
+                "me va a faltar tiempo para esta tarea",
+                "qué pasa si no alcanzo a terminar hoy"
+            ]
+        },
+
+        {
+            tag: "cancelar_tarea",
+            patterns: [
+                "quiero cancelar esta tarea",
+                "ya no quiero hacer esta tarea",
+                "cancelar tarea",
+                "elimina esta tarea",
+                "quita esta tarea",
+                "necesito cancelar el trabajo",
+                "esta tarea fue cancelada",
+                "quiero detener esta tarea",
+                "descartar esta tarea",
+                "ya no continuaré con esta tarea"
+            ]
+        }
+
+    ];
+
+    function normalizarTexto(texto) {
+
+        return texto
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[¿?¡!.,;:()"]/g, "")
+            .trim();
+    }
+
+    const palabrasClave = [];
+
+    intents.forEach(intent => {
+
+        intent.patterns.forEach(pattern => {
+
+            const palabras = normalizarTexto(pattern).split(" ");
+
+            palabras.forEach(palabra => {
+
+                if (!palabrasClave.includes(palabra)) {
+                    palabrasClave.push(palabra);
+                }
+
+            });
+
+        });
+
+    });
+
+    function textoAVector(texto) {
+
+        texto = normalizarTexto(texto);
+
+        return palabrasClave.map(palabra =>
+            texto.includes(palabra) ? 1 : 0
+        );
+    }
+
+    const trainingData = [];
+    const outputData = [];
+
+    intents.forEach((intent, index) => {
+
+        intent.patterns.forEach(pattern => {
+
+            trainingData.push(
+                textoAVector(pattern)
+            );
+
+            const output = new Array(intents.length).fill(0);
+
+            output[index] = 1;
+
+            outputData.push(output);
+
+        });
+
+    });
+
+    const model = tf.sequential();
+
+    model.add(tf.layers.dense({
+        inputShape: [palabrasClave.length],
+        units: 24,
+        activation: "relu"
+    }));
+
+    model.add(tf.layers.dense({
+        units: 24,
+        activation: "relu"
+    }));
+
+    model.add(tf.layers.dense({
+        units: intents.length,
+        activation: "softmax"
+    }));
+
+    model.compile({
+        optimizer: "adam",
+        loss: "categoricalCrossentropy",
+        metrics: ["accuracy"]
+    });
+
+    let modeloEntrenado = false;
+
+    async function entrenarIA() {
+
+        const xs = tf.tensor2d(trainingData);
+        const ys = tf.tensor2d(outputData);
+
+        await model.fit(xs, ys, {
+            epochs: 300,
+            shuffle: true
+        });
+
+        modeloEntrenado = true;
+
+        console.log("IA entrenada correctamente");
+    }
+
+    entrenarIA();
+
     zona.addEventListener("mouseenter", () => {
+
         const saludoAleatorio = saludos[Math.floor(Math.random() * saludos.length)];
+
         textoSaludo.textContent = saludoAleatorio;
+
         chat.classList.add("mostrar");
     });
 
     zona.addEventListener("mouseleave", () => {
+
         chat.classList.remove("mostrar");
-        if (inputField) inputField.value = "";
+
+        if (inputField) {
+            inputField.value = "";
+        }
+
         setTimeout(() => {
             resetearImagen();
         }, 800);
-        
     });
-    
 
     function resetearImagen() {
-        if (imageElement) imageElement.src = imagenSaludo;
+
+        if (imageElement) {
+            imageElement.src = imagenSaludo;
+        }
+    }
+
+    async function getEsdeathResponse(userInput) {
+
+        if (!modeloEntrenado) {
+
+            return {
+                texto: "Estoy aprendiendo todavía...",
+                imagen: imagenPensando
+            };
+        }
+
+        const vector = textoAVector(userInput);
+
+        const prediccion = model.predict(
+            tf.tensor2d([vector])
+        );
+
+        const resultado = await prediccion.data();
+
+        const mayor = Math.max(...resultado);
+
+        const indice = resultado.indexOf(mayor);
+
+        const intent = intents[indice].tag;
+
+        console.log("Intent detectado:", intent);
+
+        if (intent === "saludo") {
+
+            return {
+                texto: "¡Hola " + nombreUsuario + "! ¿En qué puedo ayudarte hoy?",
+                imagen: imagenPensando
+            };
+        }
+
+        if (intent === "despedida") {
+
+            return {
+                texto: "Hasta luego " + nombreUsuario + ", espero verte pronto.",
+                imagen: imagenDespidiendoce
+            };
+        }
+
+        if (intent === "tarea_terminada") {
+
+            return {
+                texto: "Excelente trabajo. La tarea será marcada como completada.",
+                imagen: imagenSaludo
+            };
+        }
+
+        if (intent === "solicitar_retroceso") {
+
+            return {
+                texto: "Actualmente no puedo regresar la tarea automáticamente. Por favor, comunícate con tu líder para realizar el cambio.",
+                imagen: imagenSeria
+            };
+        }
+
+        if (intent === "ayuda_orientacion") {
+
+            return {
+                texto: "Tu tablero Scrum tiene tareas pendientes. Presiona 'Empezar tarea' para comenzar y 'Finalizar tarea' cuando la completes.",
+                imagen: imagenPensando
+            };
+        }
+
+        if (intent === "tablero_vacio") {
+
+            return {
+                texto: "El tablero está vacío. Tal vez aún no tienes tareas asignadas, tu lider se encargara de eso.",
+                imagen: imagenSeria
+            };
+        }
+
+        if (intent === "usuario_perdido") {
+
+            return {
+                texto: "Organiza tus tareas por prioridad y empieza por la más urgente.",
+                imagen: imagenPensando
+            };
+        }
+
+        if (intent === "consultar_plazo") {
+
+            return {
+                texto: "Revisa la fecha límite de la tarea en el sistema para evitar retrasos.",
+                imagen: imagenPensando
+            };
+        }
+
+        if (intent === "cancelar_tarea") {
+
+            return {
+                texto: "La cancelación de tareas debe ser realizada por tu líder de proyecto.",
+                imagen: imagenSeria
+            };
+        }
+
+        return {
+            texto: "No entendí completamente tu mensaje. ¿Puedes explicarlo de otra forma?",
+            imagen: imagenPensando
+        };
     }
 
     if (inputField) {
-        inputField.addEventListener("keypress", (event) => {
+
+        inputField.addEventListener("keypress", async (event) => {
+
             if (event.key === "Enter") {
+
                 const messageText = inputField.value.trim();
+
                 if (messageText === "") return;
 
-                const response = getEsdeathResponse(messageText);
+                const response = await getEsdeathResponse(messageText);
 
                 textoSaludo.textContent = response.texto;
 
                 if (imageElement) {
+
                     if (response.imagen) {
                         imageElement.src = response.imagen;
-                    } else {
+                    }
+                    else {
                         imageElement.src = imagenSaludo;
                     }
                 }
@@ -67,272 +435,4 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function getEsdeathResponse(userInput) {
-        const query = userInput.toLowerCase();
-
-        if (
-            (query.includes('hola')) ||
-            (query.includes('buenas')) ||
-            (query.includes('hey')) ||
-            (query.includes('holi')) ||
-            (query.includes('saludos'))
-        ) {
-            return {
-                texto: "¡Hola " + nombreUsuario + "! ¿En qué puedo ayudarte hoy?",
-                imagen: imagenPensando
-            };
-        }
-
-        if (
-            (query.includes('no') && query.includes('tareas')) ||
-            (query.includes('sin') && query.includes('tareas')) ||
-            (query.includes('ninguna') && query.includes('tarea')) ||
-            (query.includes('no') && query.includes('me') && query.includes('asignan')) ||
-            (query.includes('porque') && query.includes('no') && query.includes('tengo') && query.includes('tareas'))
-        ) {
-            return {
-                texto: "Tu tablero está vacío porque aún no te asignan tareas.",
-                imagen: imagenSeria
-            };
-        }
-
-        if (
-            (query.includes('muchas') && query.includes('tareas')) ||
-            (query.includes('demasiadas') && query.includes('tareas')) ||
-            (query.includes('mucho') && query.includes('trabajo')) ||
-            (query.includes('estoy') && query.includes('ocupado')) ||
-            (query.includes('tengo') && query.includes('mucho') && query.includes('hacer'))
-        ) {
-            return {
-                texto: "Tienes bastantes tareas pendientes. Organízalas por prioridad.",
-                imagen: imagenPensando
-            };
-        }
-
-        if (
-            (query.includes('crear') && query.includes('tarea')) ||
-            (query.includes('nueva') && query.includes('tarea')) ||
-            (query.includes('agregar') && query.includes('tarea')) ||
-            (query.includes('hacer') && query.includes('actividad')) ||
-            (query.includes('registrar') && query.includes('tarea'))
-        ) {
-            return {
-                texto: "Para crear una tarea debes asignar título, descripción y responsable.",
-                imagen: imagenPensando
-            };
-        }
-
-        if (
-            (query.includes('termine') && query.includes('tarea')) ||
-            (query.includes('complete') && query.includes('tarea')) ||
-            (query.includes('ya') && query.includes('acabe')) ||
-            (query.includes('finalice') && query.includes('actividad')) ||
-            (query.includes('ya') && query.includes('esta') && query.includes('lista'))
-        ) {
-            return {
-                texto: "¡Buen trabajo! No olvides mover la tarea a 'Terminado'.",
-                imagen: imagenGritando
-            };
-        }
-
-        if (
-            (query.includes('error')) ||
-            (query.includes('falla')) ||
-            (query.includes('bug')) ||
-            (query.includes('problema')) ||
-            (query.includes('no') && query.includes('funciona'))
-        ) {
-            return {
-                texto: "Se detectó un problema en el sistema.",
-                imagen: imagenGritando
-            };
-        }
-
-        if (
-            (query.includes('retrasado')) ||
-            (query.includes('vamos') && query.includes('lentos')) ||
-            (query.includes('demora')) ||
-            (query.includes('no') && query.includes('avanzamos')) ||
-            (query.includes('proyecto') && query.includes('atrasado'))
-        ) {
-            return {
-                texto: "El proyecto parece retrasado. Revisa las prioridades.",
-                imagen: imagenSeria
-            };
-        }
-
-        if (
-            (query.includes('scrum')) ||
-            (query.includes('tablero')) ||
-            (query.includes('kanban')) ||
-            (query.includes('columnas')) ||
-            (query.includes('estados') && query.includes('tareas'))
-        ) {
-            return {
-                texto: "El tablero Scrum organiza las tareas según su estado.",
-                imagen: imagenPensando
-            };
-        }
-
-        if (
-            (query.includes('bloqueada')) ||
-            (query.includes('no') && query.includes('puedo') && query.includes('continuar')) ||
-            (query.includes('dependencia')) ||
-            (query.includes('esperando')) ||
-            (query.includes('detenida'))
-        ) {
-            return {
-                texto: "La tarea parece bloqueada. Consulta con tu líder.",
-                imagen: imagenSeria
-            };
-        }
-
-        if (
-            (query.includes('avance')) ||
-            (query.includes('progreso')) ||
-            (query.includes('como') && query.includes('vamos')) ||
-            (query.includes('estado') && query.includes('proyecto')) ||
-            (query.includes('porcentaje'))
-        ) {
-            return {
-                texto: "El avance depende de las tareas completadas.",
-                imagen: imagenPensando
-            };
-        }
-
-        if (
-            (query.includes('urgente')) ||
-            (query.includes('critico')) ||
-            (query.includes('importante')) ||
-            (query.includes('prioridad')) ||
-            (query.includes('grave'))
-        ) {
-            return {
-                texto: "¡Atención! Hay tareas prioritarias pendientes.",
-                imagen: imagenGritando
-            };
-        }
-
-        if (
-            (query.includes('base') && query.includes('datos')) ||
-            (query.includes('oracle')) ||
-            (query.includes('sql')) ||
-            (query.includes('bd')) ||
-            (query.includes('conexion') && query.includes('datos'))
-        ) {
-            return {
-                texto: "La base de datos almacena toda la información del sistema.",
-                imagen: imagenPensando
-            };
-        }
-
-        if (
-            (query.includes('api')) ||
-            (query.includes('backend')) ||
-            (query.includes('servidor')) ||
-            (query.includes('endpoint')) ||
-            (query.includes('peticion'))
-        ) {
-            return {
-                texto: "El backend procesa las solicitudes del sistema.",
-                imagen: imagenPensando
-            };
-        }
-
-        if (
-            (query.includes('frontend')) ||
-            (query.includes('interfaz')) ||
-            (query.includes('pantalla')) ||
-            (query.includes('visual')) ||
-            (query.includes('diseño'))
-        ) {
-            return {
-                texto: "El frontend controla la parte visual del sistema.",
-                imagen: imagenPensando
-            };
-        }
-
-        if (
-            (query.includes('login')) ||
-            (query.includes('contraseña')) ||
-            (query.includes('no') && query.includes('puedo') && query.includes('entrar')) ||
-            (query.includes('sesion')) ||
-            (query.includes('correo'))
-        ) {
-            return {
-                texto: "Verifica tus credenciales antes de iniciar sesión.",
-                imagen: imagenSeria
-            };
-        }
-
-        if (
-            (query.includes('permiso')) ||
-            (query.includes('acceso') && query.includes('denegado')) ||
-            (query.includes('no') && query.includes('puedo') && query.includes('editar')) ||
-            (query.includes('restriccion')) ||
-            (query.includes('no') && query.includes('autorizado'))
-        ) {
-            return {
-                texto: "No tienes permisos suficientes para realizar esa acción.",
-                imagen: imagenSeria
-            };
-        }
-
-        if (
-            (query.includes('estresado')) ||
-            (query.includes('cansado')) ||
-            (query.includes('agotado')) ||
-            (query.includes('mucho') && query.includes('trabajo')) ||
-            (query.includes('no') && query.includes('puedo') && query.includes('mas'))
-        ) {
-            return {
-                texto: "Parece que necesitas organizar mejor tus tareas y descansar un poco.",
-                imagen: imagenSeria
-            };
-        }
-
-        if (
-            (query.includes('motivame')) ||
-            (query.includes('motivacion')) ||
-            (query.includes('animo')) ||
-            (query.includes('seguimos')) ||
-            (query.includes('puedo') && query.includes('hacerlo'))
-        ) {
-            return {
-                texto: "¡Claro que puedes! Sigue avanzando en tus tareas.",
-                imagen: imagenGritando
-            };
-        }
-
-        if (
-            (query.includes('gracias')) ||
-            (query.includes('muchas gracias')) ||
-            (query.includes('te agradezco')) ||
-            (query.includes('thanks')) ||
-            (query.includes('genial'))
-        ) {
-            return {
-                texto: "¡Con gusto! Estoy aquí para ayudarte.",
-                imagen: imagenPensando
-            };
-        }
-
-        if (
-            (query.includes('adios')) ||
-            (query.includes('bye')) ||
-            (query.includes('hasta luego')) ||
-            (query.includes('nos vemos')) ||
-            (query.includes('chao'))
-        ) {
-            return {
-                texto: "¡Hasta luego! " + nombreUsuario +" Mucha suerte con tu proyecto.",
-                imagen: imagenDespidiendoce
-            };
-        }
-
-        return {
-            texto: "No entendí completamente tu mensaje. ¿Puedes explicarlo de otra forma?",
-            imagen: imagenPensando
-        };
-    }
 });
