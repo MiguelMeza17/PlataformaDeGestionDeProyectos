@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using GestionDeProyectos.pkgDomain;
 using GestionDeProyectos.pkgSystem;
 using GestionDeProyectos.pkgData;
+using Oracle.ManagedDataAccess.Client;
 
 #nullable disable
 
@@ -24,18 +25,12 @@ namespace GestionDeProyectos.pkgUI
         {
             clsRoles rolEnum = clsRoles.Developer;
 
-            if (rolStr == "R1")
-            {
+            if (rolStr == "0")
                 rolEnum = clsRoles.Admin;
-            }
-            else if (rolStr == "R2")
-            {
+            else if (rolStr == "1")
                 rolEnum = clsRoles.Manager;
-            }
-            else if (rolStr == "R3")
-            {
+            else if (rolStr == "2")
                 rolEnum = clsRoles.Developer;
-            }
 
             clsStakeholder varObj = new clsStakeholder(id, name, desc, email, pass, rolEnum);
             attStakeholders.Add(varObj);
@@ -284,6 +279,38 @@ namespace GestionDeProyectos.pkgUI
             
             return clsBrockerCrud.opAssociateItemTo(prmObj, attStakeholders);
         }
+    private bool opAssociateStakeholder2(clsStakeholder prmStakeholder)
+    {
+        // Usamos tu clase para obtener la conexión
+        using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
+        {
+            try
+            {
+                vrmConn.Open();
+
+                string sql = @"INSERT INTO USUARIO (IDUSUARIO, NOMBRE, DESCRIPCION, EMAIL, CONTRASENA, ROL) 
+                            VALUES (:id, :name, :desc, :email, :pass, :rol)";
+
+                using (OracleCommand vrmCmd = new OracleCommand(sql, vrmConn))
+                {
+                    // Agregamos los parámetros con ':'
+                    vrmCmd.Parameters.Add("id", OracleDbType.Int32).Value = prmStakeholder.opGetOUID();
+                    vrmCmd.Parameters.Add("name", OracleDbType.Varchar2).Value = prmStakeholder.opGetName();
+                    vrmCmd.Parameters.Add("desc", OracleDbType.Varchar2).Value = prmStakeholder.opGetDescription();
+                    vrmCmd.Parameters.Add("email", OracleDbType.Varchar2).Value = prmStakeholder.opGetEmail();
+                    vrmCmd.Parameters.Add("pass", OracleDbType.Varchar2).Value = prmStakeholder.opGetPassword();
+                    vrmCmd.Parameters.Add("rol", OracleDbType.Varchar2).Value = prmStakeholder.opGetRol().ToString();
+
+                    return vrmCmd.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error en opAssociateStakeholder: " + ex.Message);
+                return false;
+            }
+        }
+    }
 
         private bool opAssociateTask(clsTask prmObj)
         {

@@ -60,6 +60,82 @@ END AFTER STATEMENT;
 
 END;
 /
+/*==============================================================*/
+/* TRIGGER CORREO                                               */
+/*==============================================================*/
+
+CREATE OR REPLACE TRIGGER TRG_CORREO
+BEFORE INSERT OR UPDATE ON USUARIO
+FOR EACH ROW
+BEGIN
+
+    IF :NEW.CORREO NOT LIKE '%@gmail.com' THEN
+        RAISE_APPLICATION_ERROR(
+            -20001,
+            'EL CORREO DEBE SER GMAIL'
+        );
+    END IF;
+
+END;
+/
+
+/*==============================================================*/
+/* TRIGGER FECHA LIMITE TAREA                                   */
+/*==============================================================*/
+
+CREATE OR REPLACE TRIGGER TRG_FECHAS
+BEFORE INSERT OR UPDATE ON TAREA
+FOR EACH ROW
+BEGIN
+
+    IF :NEW.FECHA_LIMITE < :NEW.FECHA_INICIO THEN
+        RAISE_APPLICATION_ERROR(
+            -20002,
+            'FECHA LIMITE INVALIDA'
+        );
+    END IF;
+
+END;
+/
+
+/*==============================================================*/
+/* TRIGGER PROYECTO AVANCE                                      */
+/*==============================================================*/
+
+CREATE OR REPLACE TRIGGER TRG_AVANCE
+BEFORE UPDATE ON PROYECTO
+FOR EACH ROW
+BEGIN
+
+    IF :NEW.PORCENTAJE_DE_AVANCE > 100 THEN
+        RAISE_APPLICATION_ERROR(
+            -20003,
+            'AVANCE INVALIDO'
+        );
+    END IF;
+
+END;
+/
+
+/*==============================================================*/
+/* TRIGGER LONGITUD CONTRASEÑA                                  */
+/*==============================================================*/
+
+CREATE OR REPLACE TRIGGER TRG_PASSWORD
+BEFORE INSERT ON USUARIO
+FOR EACH ROW
+BEGIN
+
+    IF LENGTH(:NEW.CONTRASENA) < 6 THEN
+        RAISE_APPLICATION_ERROR(
+            -20004,
+            'PASSWORD MUY CORTA'
+        );
+    END IF;
+
+END;
+/
+
 
 /*==============================================================*/
 /* VISTAS                                                       */
@@ -113,3 +189,19 @@ CREATE ROLE DESARROLLADOR_ROLE;
 GRANT SELECT ON V_DESARROLLADOR TO DESARROLLADOR_ROLE;
 GRANT SELECT ON V_ADMIN TO ADMIN_ROLE;
 GRANT SELECT ON V_USUARIO_TAREA TO LIDER_ROLE;
+
+/*==============================================================*/
+/* VISTA TAREAS EN PROYECTO                                     */
+/*==============================================================*/
+CREATE OR REPLACE VIEW VW_TAREAS_PROYECTO AS
+
+SELECT
+    P.NOMBRE PROYECTO,
+    T.NOMBRE TAREA,
+    E.NOMBRE ESTADO
+FROM PROYECTO P
+JOIN TAREA T
+    ON P.ID_PROYECTO = T.ID_PROYECTO
+JOIN ESTADO E
+    ON T.ID_ESTADO = E.ID_ESTADO;
+/

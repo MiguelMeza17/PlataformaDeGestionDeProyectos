@@ -166,6 +166,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 "descartar esta tarea",
                 "ya no continuaré con esta tarea"
             ]
+        },
+        {
+            tag: "cambiar_estado_tarea",
+            patterns: [
+                "cambia el estado de la tarea",
+                "pon la tarea en progreso",
+                "marca esta tarea como completada",
+                "necesito cambiar el estado a mi tarea",
+                "actualiza el estado de la tarea",
+                "la tarea ahora está terminada",
+                "mueve esta tarea a pendiente",
+                "cambiar estado",
+                "la tarea ya está hecha",
+                "pon esta tarea en espera"
+            ]
         }
 
     ];
@@ -396,6 +411,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             return {
                 texto: "La cancelación de tareas debe ser realizada por tu líder de proyecto.",
+                imagen: imagenSeria
+            };
+        }
+
+        if (intent === "cambiar_estado_tarea") {
+
+            return {
+                texto: "Si quieres modificar el estado de una tarea sol ve al tablero scrum busca la tarea y preciona el boton cambiar estado",
                 imagen: imagenSeria
             };
         }

@@ -38,6 +38,26 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/pkgUI" 
 });
 
+app.MapPost("/api/login", (LoginDTO datos) => {
+    try 
+    {
+        var controlador = clsController.opGetInstance();
+        var usuario = controlador.opLoginStakeholder(datos.nombre, datos.password);
+
+        if (usuario != null) {
+            return Results.Ok(new {
+                nombre = usuario.GetNombre(),
+                rolId = (int)usuario.GetRol()
+            });
+        }
+        return Results.Json(new { mensaje = "Usuario o contraseña incorrectos" }, statusCode: 401);
+    }
+    catch (Exception ex) 
+    {
+        return Results.Problem("Error interno en el login: " + ex.Message);
+    }
+});
+
 app.MapPost("/api/registrar", (UsuarioRegistroDTO datos) => {
     try 
     {
@@ -76,28 +96,8 @@ app.MapPost("/api/registrar", (UsuarioRegistroDTO datos) => {
     }
 });
 
-app.MapPost("/api/login", (LoginDTO datos) => {
-    try 
-    {
-        var controlador = clsController.opGetInstance();
-        var usuario = controlador.opLoginStakeholder(datos.nombre, datos.password);
-
-        if (usuario != null) {
-            return Results.Ok(new {
-                nombre = usuario.GetNombre(),
-                rolId = (int)usuario.GetRol()
-            });
-        }
-        return Results.Json(new { mensaje = "Usuario o contraseña incorrectos" }, statusCode: 401);
-    }
-    catch (Exception ex) 
-    {
-        return Results.Problem("Error interno en el login: " + ex.Message);
-    }
-});
-
 Console.WriteLine("Servidor iniciado en http://localhost:5000");
 app.Run("http://localhost:5000");
 
-public record UsuarioRegistroDTO(string id, string nombre, string email, string password, string rol);
 public record LoginDTO(string nombre, string password);
+public record UsuarioRegistroDTO(string id, string nombre, string email, string password, string rol);
