@@ -141,6 +141,19 @@ END;
 /* VISTAS                                                       */
 /*==============================================================*/
 
+-- 1. Vista tarea en proyecto
+CREATE OR REPLACE VIEW VW_TAREAS_PROYECTO AS
+
+SELECT
+    P.NOMBRE PROYECTO,
+    T.NOMBRE TAREA,
+    E.NOMBRE ESTADO
+FROM PROYECTO P
+JOIN TAREA T
+    ON P.ID_PROYECTO = T.ID_PROYECTO
+JOIN ESTADO E
+    ON T.ID_ESTADO = E.ID_ESTADO;
+/
 -- 1. Vista de tareas con detalle
 CREATE OR REPLACE VIEW V_TAREA_DETALLE AS
 SELECT
@@ -189,19 +202,3 @@ CREATE ROLE DESARROLLADOR_ROLE;
 GRANT SELECT ON V_DESARROLLADOR TO DESARROLLADOR_ROLE;
 GRANT SELECT ON V_ADMIN TO ADMIN_ROLE;
 GRANT SELECT ON V_USUARIO_TAREA TO LIDER_ROLE;
-
-/*==============================================================*/
-/* VISTA TAREAS EN PROYECTO                                     */
-/*==============================================================*/
-CREATE OR REPLACE VIEW VW_TAREAS_PROYECTO AS
-
-SELECT
-    P.NOMBRE PROYECTO,
-    T.NOMBRE TAREA,
-    E.NOMBRE ESTADO
-FROM PROYECTO P
-JOIN TAREA T
-    ON P.ID_PROYECTO = T.ID_PROYECTO
-JOIN ESTADO E
-    ON T.ID_ESTADO = E.ID_ESTADO;
-/
