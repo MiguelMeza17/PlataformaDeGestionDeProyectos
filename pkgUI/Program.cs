@@ -63,20 +63,12 @@ app.MapPost("/api/registrar", (UsuarioRegistroDTO datos) => {
     {
         var controlador = clsController.opGetInstance();
 
-        if (!int.TryParse(datos.id, out int idConvertido))
+        if (!Enum.TryParse(datos.rol, out clsRoles rolEnum))
         {
-            return Results.BadRequest(new { mensaje = "El ID debe ser un número entero válido." });
+            return Results.BadRequest(new { mensaje = "El rol proporcionado no es válido." });
         }
-
-        if (!int.TryParse(datos.rol, out int rolInt))
-        {
-            return Results.BadRequest(new { mensaje = "El rol debe ser un número (0, 1 o 2)." });
-        }
-
-        clsRoles rolEnum = (clsRoles)rolInt;
 
         bool exito = controlador.opRegisterStakeholder(
-            idConvertido, 
             datos.nombre, 
             "Registro desde Web", 
             datos.email, 
@@ -85,9 +77,9 @@ app.MapPost("/api/registrar", (UsuarioRegistroDTO datos) => {
         );
 
         if (exito) {
-            return Results.Ok(new { mensaje = "Usuario guardado con éxito en Oracle" });
+            return Results.Ok(new { mensaje = "Usuario guardado con éxito" });
         } else {
-            return Results.BadRequest(new { mensaje = "El ID ya existe o hubo un error en la BD" });
+            return Results.BadRequest(new { mensaje = "El usuario ya existe o hubo un error" });
         }
     }
     catch (Exception ex) 

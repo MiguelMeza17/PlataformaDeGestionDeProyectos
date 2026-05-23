@@ -4,6 +4,7 @@ using GestionDeProyectos.pkgDomain;
 using GestionDeProyectos.pkgSystem;
 using GestionDeProyectos.pkgData;
 using Oracle.ManagedDataAccess.Client;
+using System.Data;
 
 #nullable disable
 
@@ -65,7 +66,7 @@ namespace GestionDeProyectos.pkgUI
             string prmGeneralState,
             float prmAdvancePercentage)
         {
-            clsProject varObj = opGetProject(prmOUID);
+            clsProject varObj = opGetProject(0,prmName);
 
             if (varObj != null) 
                 return false;
@@ -82,30 +83,70 @@ namespace GestionDeProyectos.pkgUI
                 return opAssociateProject(newProject);
         }
 
-        public bool opRegisterStakeholder(
-            int prmOUID,
-            string prmName,
-            string prmDescription,
-            string prmEmail,
-            string prmPassword,
-            clsRoles prmRol)
+    public bool opRegisterStakeholder(
+        string prmName,
+        string prmDescription,
+        string prmEmail,
+        string prmPassword,
+        clsRoles prmRol)
+    {
+        clsStakeholder varObj = opGetStakeholder(0, prmEmail);
+        if (varObj != null) return false;
+
+        using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
         {
-            clsStakeholder varObj = opGetStakeholder(prmOUID);
+            try
+            {
+                vrmConn.Open();
 
-            if (varObj != null) 
+                string sql = @"INSERT INTO USUARIO 
+                (NOMBRE, DESCRIPCION, CORREO, CONTRASENA, ID_ROL) 
+                VALUES (:name, :description, :email, :password, :rol) 
+                RETURNING ID_USUARIO INTO :prmId";
+
+                using (OracleCommand vrmCmd = new OracleCommand(sql, vrmConn))
+                {
+                    vrmCmd.Parameters.Add("name", OracleDbType.Varchar2).Value = prmName;
+                    vrmCmd.Parameters.Add("description", OracleDbType.Varchar2).Value = prmDescription;
+                    vrmCmd.Parameters.Add("email", OracleDbType.Varchar2).Value = prmEmail;
+                    vrmCmd.Parameters.Add("password", OracleDbType.Varchar2).Value = prmPassword;
+                    vrmCmd.Parameters.Add("rol", OracleDbType.Int32).Value = prmRol;
+
+                    OracleParameter outParam = new OracleParameter("prmId", OracleDbType.Int32)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    vrmCmd.Parameters.Add(outParam);
+
+                    if (vrmCmd.ExecuteNonQuery() > 0)
+                    {
+                        int prmOUID = Convert.ToInt32(outParam.Value.ToString());
+
+                        clsStakeholder newStakeholder = new clsStakeholder(
+                            prmOUID,
+                            prmName,
+                            prmDescription,
+                            prmEmail,
+                            prmPassword,
+                            prmRol
+                        );
+
+                        return opAssociateStakeholder(newStakeholder);
+                    }
+
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error en opRegisterStakeholder: " + ex.Message);
                 return false;
-
-            clsStakeholder newStakeholder = new clsStakeholder(
-                prmOUID,
-                prmName,
-                prmDescription,
-                prmEmail,
-                prmPassword,
-                prmRol
-            );
-
-            return opAssociateStakeholder(newStakeholder);
+            }
         }
+    }
+
+
 
         public bool opRegisterTask(
             int prmOUID,
@@ -114,7 +155,7 @@ namespace GestionDeProyectos.pkgUI
             DateTime prmFirstDate,
             DateTime prmLimitDate)
         {
-            clsTask varObj = opGetTask(prmOUID);
+            clsTask varObj = opGetTask(0,prmName);
 
             if (varObj != null)
                 return false;
@@ -137,7 +178,7 @@ namespace GestionDeProyectos.pkgUI
             string prmProgressSummary,
             int prmRetardedTasks)
         {
-            clsProject varProject = opGetProject(prmProjectOUID);
+            clsProject varProject = opGetProject(prmProjectOUID,null);
 
             if (varProject == null)
                 return false;
@@ -161,7 +202,7 @@ namespace GestionDeProyectos.pkgUI
             string prmGeneralState,
             float prmAdvancePercentage)
         {
-            clsProject varObj = opGetProject(prmOUID);
+            clsProject varObj = opGetProject(prmOUID,null);
 
             if (varObj == null)
                 return false;
@@ -183,7 +224,7 @@ namespace GestionDeProyectos.pkgUI
             string prmPassword,
             clsRoles prmRol)
         {
-            clsStakeholder varObj = opGetStakeholder(prmOUID);
+            clsStakeholder varObj = opGetStakeholder(prmOUID,null);
 
             if (varObj == null)
                 return false;
@@ -203,7 +244,7 @@ namespace GestionDeProyectos.pkgUI
             DateTime prmFirstDate,
             DateTime prmLimitDate)
         {
-            clsTask varObj = opGetTask(prmOUID);
+            clsTask varObj = opGetTask(prmOUID,null);
 
             if (varObj == null)
                 return false;
@@ -224,7 +265,7 @@ namespace GestionDeProyectos.pkgUI
             string prmProgressSummary,
             int prmRetardedTasks)
         {
-            clsProject varProject = opGetProject(prmProjectOUID);
+            clsProject varProject = opGetProject(prmProjectOUID,null);
 
             if (varProject == null)
                 return false;
@@ -240,21 +281,21 @@ namespace GestionDeProyectos.pkgUI
         }
         public bool opDeleteProject(int prmOUID)
         {
-            clsProject varObj = opGetProject(prmOUID);
+            clsProject varObj = opGetProject(prmOUID,null);
             if(varObj == null) return false;
             if(!varObj.opDie()) return false;
             return opDisassociateProject(varObj);
         }
         public bool opDeleteStakeholder(int prmOUID)
         {
-            clsStakeholder varObj = opGetStakeholder(prmOUID);
+            clsStakeholder varObj = opGetStakeholder(prmOUID,null);
             if(varObj == null) return false;
             if(!varObj.opDie()) return false;
             return opDisassociateStakeholder(varObj);
         }
         public bool opDeleteTask(int prmOUID)
         {
-            clsTask varObj = opGetTask(prmOUID);
+            clsTask varObj = opGetTask(prmOUID,null);
             if(varObj == null) return false;
             if(!varObj.opDie()) return false;
             return opDisassociateTask(varObj);
@@ -263,7 +304,7 @@ namespace GestionDeProyectos.pkgUI
             int prmProjectOUID,
             int prmOUID)
         {
-            clsProject varObj = opGetProject(prmProjectOUID);
+            clsProject varObj = opGetProject(prmProjectOUID,null);
             if(varObj == null) return false;
             if(!varObj.opDie()) return false;
             return varObj.opDeleteReport(prmOUID);
@@ -279,38 +320,6 @@ namespace GestionDeProyectos.pkgUI
             
             return clsBrockerCrud.opAssociateItemTo(prmObj, attStakeholders);
         }
-    private bool opAssociateStakeholder2(clsStakeholder prmStakeholder)
-    {
-        // Usamos tu clase para obtener la conexión
-        using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
-        {
-            try
-            {
-                vrmConn.Open();
-
-                string sql = @"INSERT INTO USUARIO (IDUSUARIO, NOMBRE, DESCRIPCION, EMAIL, CONTRASENA, ROL) 
-                            VALUES (:id, :name, :desc, :email, :pass, :rol)";
-
-                using (OracleCommand vrmCmd = new OracleCommand(sql, vrmConn))
-                {
-                    // Agregamos los parámetros con ':'
-                    vrmCmd.Parameters.Add("id", OracleDbType.Int32).Value = prmStakeholder.opGetOUID();
-                    vrmCmd.Parameters.Add("name", OracleDbType.Varchar2).Value = prmStakeholder.opGetName();
-                    vrmCmd.Parameters.Add("desc", OracleDbType.Varchar2).Value = prmStakeholder.opGetDescription();
-                    vrmCmd.Parameters.Add("email", OracleDbType.Varchar2).Value = prmStakeholder.opGetEmail();
-                    vrmCmd.Parameters.Add("pass", OracleDbType.Varchar2).Value = prmStakeholder.opGetPassword();
-                    vrmCmd.Parameters.Add("rol", OracleDbType.Varchar2).Value = prmStakeholder.opGetRol().ToString();
-
-                    return vrmCmd.ExecuteNonQuery() > 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error en opAssociateStakeholder: " + ex.Message);
-                return false;
-            }
-        }
-    }
 
         private bool opAssociateTask(clsTask prmObj)
         {
@@ -331,19 +340,29 @@ namespace GestionDeProyectos.pkgUI
         {
             return clsBrockerCrud.opDisassociateItemFrom(prmObj, attTasks);
         }
-        public clsProject opGetProject(int prmOUID)
+        public clsProject opGetProject(int prmOUID, string prmName)
         {
-            return clsBrockerCrud.opGetItem(prmOUID, attProjects);
+            if(prmOUID != 0)
+                return clsBrockerCrud.opGetItem(prmOUID, attProjects);
+            else
+               return clsBrockerCrud.opGetItemByName(prmName, attProjects); 
         }
 
-        public clsStakeholder opGetStakeholder(int prmOUID)
+        public clsStakeholder opGetStakeholder(int prmOUID, string prmEmail)
         {
-            return clsBrockerCrud.opGetItem(prmOUID, attStakeholders);
+            if(prmOUID != 0)
+                return clsBrockerCrud.opGetItem(prmOUID, attStakeholders);
+            else
+               return clsBrockerCrud.opGetItemByEmail(prmEmail, attStakeholders); 
+
         }
 
-        public clsTask opGetTask(int prmOUID)
+        public clsTask opGetTask(int prmOUID , string prmName)
         {
-            return clsBrockerCrud.opGetItem(prmOUID, attTasks);
+            if(prmOUID != 0)
+                return clsBrockerCrud.opGetItem(prmOUID, attTasks);
+            else
+                return clsBrockerCrud.opGetItemByName(prmName, attTasks);
         }
     }
 }
