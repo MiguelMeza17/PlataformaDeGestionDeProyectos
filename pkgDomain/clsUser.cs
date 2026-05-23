@@ -11,5 +11,9 @@ namespace GestionDeProyectos.pkgDomain
             attEmail = prmEmail;
             attPassword = prmPassword;
         }
+        public string opGetEmail()
+        {
+            return attEmail;
+        }
     }
 }
