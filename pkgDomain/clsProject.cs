@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GestionDeProyectos.pkgSystem;
+#nullable disable
 
 namespace GestionDeProyectos.pkgDomain
 {
@@ -39,7 +40,7 @@ namespace GestionDeProyectos.pkgDomain
          string prmProgressSummary,
          int prmRetardedTasks)
       {
-         clsReport varObj = opGetReport(prmOUID);
+         clsReport varObj = opGetReport(0,prmName);
 
          if (varObj != null) return false;
 
@@ -62,7 +63,7 @@ namespace GestionDeProyectos.pkgDomain
          string prmProgressSummary,
          int prmRetardedTasks)
       {
-         clsReport varObj = opGetReport(prmOUID);
+         clsReport varObj = opGetReport(prmOUID,null);
 
          if (varObj == null) return false;
 
@@ -76,7 +77,7 @@ namespace GestionDeProyectos.pkgDomain
       public bool opDeleteReport(
             int prmOUID)
         {
-            clsReport varObj = opGetReport(prmOUID);
+            clsReport varObj = opGetReport(prmOUID,null);
             if(varObj == null) return false;
             if(!varObj.opDie()) return false;
             return opDisassociateReport(varObj);
@@ -90,9 +91,12 @@ namespace GestionDeProyectos.pkgDomain
       {
          return clsBrockerCrud.opDisassociateItemFrom(prmObj, attReports);
       }
-      public clsReport opGetReport(int prmOUID)
+      public clsReport opGetReport(int prmOUID, string prmName)
       {
-         return clsBrockerCrud.opGetItem(prmOUID, attReports);
+         if(prmOUID != 0)
+            return clsBrockerCrud.opGetItem(prmOUID, attReports);
+         else
+            return clsBrockerCrud.opGetItemByName(prmName, attReports);
       }
 
       public bool opModify(

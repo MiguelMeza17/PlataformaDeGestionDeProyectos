@@ -15,6 +15,10 @@ namespace GestionDeProyectos.pkgDomain
             attDescription = prmDescription;
         }
 
+        public string opGetName()
+        {
+            return attName;
+        }
         public int opGetOUID()
         {
             return attOUID;
