@@ -5,57 +5,57 @@ CREATE OR REPLACE TRIGGER TRG_AVANCE_SIMPLE
 FOR INSERT OR UPDATE OR DELETE ON TAREA
 COMPOUND TRIGGER
 
-   TYPE t_ids IS TABLE OF PROYECTO.ID_PROYECTO%TYPE INDEX BY PLS_INTEGER;
-   g_ids   t_ids;
-   g_count PLS_INTEGER := 0;
+TYPE t_ids IS TABLE OF PROYECTO.ID_PROYECTO%TYPE INDEX BY PLS_INTEGER;
+g_ids   t_ids;
+g_count PLS_INTEGER := 0;
 
-   PROCEDURE agregar_proyecto(p_id_proy PROYECTO.ID_PROYECTO%TYPE) IS
-   BEGIN
-      IF p_id_proy IS NOT NULL THEN
-         g_count := g_count + 1;
-         g_ids(g_count) := p_id_proy;
-      END IF;
-   END;
+PROCEDURE agregar_proyecto(p_id_proy PROYECTO.ID_PROYECTO%TYPE) IS
+BEGIN
+    IF p_id_proy IS NOT NULL THEN
+        g_count := g_count + 1;
+        g_ids(g_count) := p_id_proy;
+    END IF;
+END;
 
-   PROCEDURE recalcular_proyecto(p_id_proy PROYECTO.ID_PROYECTO%TYPE) IS
-      v_total      NUMBER := 0;
-      v_terminadas NUMBER := 0;
-      v_porcentaje  NUMBER(5,2) := 0;
-   BEGIN
-      SELECT COUNT(*) INTO v_total FROM TAREA WHERE ID_PROYECTO = p_id_proy;
+PROCEDURE recalcular_proyecto(p_id_proy PROYECTO.ID_PROYECTO%TYPE) IS
+    v_total      NUMBER := 0;
+    v_terminadas NUMBER := 0;
+    v_porcentaje  NUMBER(5,2) := 0;
+BEGIN
+    SELECT COUNT(*) INTO v_total FROM TAREA WHERE ID_PROYECTO = p_id_proy;
 
-      SELECT COUNT(*)
-      INTO v_terminadas
-      FROM TAREA T
-      JOIN ESTADO E ON E.ID_ESTADO = T.ID_ESTADO
-      WHERE T.ID_PROYECTO = p_id_proy
-        AND UPPER(E.NOMBRE) = 'FINISHED'; -- Ajustado a tu valor de inserción
+    SELECT COUNT(*)
+    INTO v_terminadas
+    FROM TAREA T
+    JOIN ESTADO E ON E.ID_ESTADO = T.ID_ESTADO
+    WHERE T.ID_PROYECTO = p_id_proy
+    AND UPPER(E.NOMBRE) = 'FINISHED'; -- Ajustado a tu valor de inserción
 
-      IF v_total > 0 THEN
-         v_porcentaje := ROUND((v_terminadas / v_total) * 100, 2);
-      ELSE
-         v_porcentaje := 0;
-      END IF;
+    IF v_total > 0 THEN
+        v_porcentaje := ROUND((v_terminadas / v_total) * 100, 2);
+    ELSE
+        v_porcentaje := 0;
+    END IF;
 
-      UPDATE PROYECTO
-      SET PORCENTAJE_DE_AVANCE = v_porcentaje,
-          ESTADO_GENERAL = CASE
-                             WHEN v_porcentaje = 100 THEN 'Finished'
-                             WHEN v_porcentaje = 0 THEN 'ToDevelop'
-                             ELSE 'InDevelopment'
-                           END
-      WHERE ID_PROYECTO = p_id_proy;
-   END;
+    UPDATE PROYECTO
+    SET PORCENTAJE_DE_AVANCE = v_porcentaje,
+        ESTADO_GENERAL = CASE
+                            WHEN v_porcentaje = 100 THEN 'Finished'
+                            WHEN v_porcentaje = 0 THEN 'ToDevelop'
+                            ELSE 'InDevelopment'
+                        END
+    WHERE ID_PROYECTO = p_id_proy;
+END;
 
 AFTER EACH ROW IS
 BEGIN
-   IF INSERTING OR UPDATING THEN agregar_proyecto(:NEW.ID_PROYECTO); END IF;
-   IF DELETING OR UPDATING THEN agregar_proyecto(:OLD.ID_PROYECTO); END IF;
+IF INSERTING OR UPDATING THEN agregar_proyecto(:NEW.ID_PROYECTO); END IF;
+IF DELETING OR UPDATING THEN agregar_proyecto(:OLD.ID_PROYECTO); END IF;
 END AFTER EACH ROW;
 
 AFTER STATEMENT IS
 BEGIN
-   FOR i IN 1 .. g_count LOOP recalcular_proyecto(g_ids(i)); END LOOP;
+FOR i IN 1 .. g_count LOOP recalcular_proyecto(g_ids(i)); END LOOP;
 END AFTER STATEMENT;
 
 END;
