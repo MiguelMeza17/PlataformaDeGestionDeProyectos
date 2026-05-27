@@ -61,6 +61,59 @@ END AFTER STATEMENT;
 END;
 /
 /*==============================================================*/
+/* PRUEBA COMPLETA TRIGGER TRG_AVANCE_SIMPLE                    */
+/*==============================================================*/
+
+-- Eliminar la tarea de prueba si ya existe
+DELETE FROM TAREA
+WHERE NOMBRE = 'PRUEBA TRIGGER';
+
+COMMIT;
+
+-- Ver estado actual del proyecto
+SELECT
+    ID_PROYECTO,
+    NOMBRE,
+    ESTADO_GENERAL,
+    PORCENTAJE_DE_AVANCE
+FROM PROYECTO
+WHERE ID_PROYECTO = 100;
+
+-- Insertar tarea finalizada
+INSERT INTO TAREA
+(
+    NOMBRE,
+    DESCRIPCION,
+    FECHA_INICIO,
+    FECHA_LIMITE,
+    ID_ESTADO,
+    ID_PROYECTO,
+    ID_USUARIO_ASIGNA,
+    ID_USUARIO_DESARROLLA
+)
+VALUES
+(
+    'PRUEBA TRIGGER',
+    'VALIDACION AUTOMATICA',
+    SYSDATE,
+    SYSDATE + 5,
+    2,
+    100,
+    100,
+    101
+);
+
+COMMIT;
+
+-- Verificar cambios automáticos del trigger
+SELECT
+    ID_PROYECTO,
+    NOMBRE,
+    ESTADO_GENERAL,
+    PORCENTAJE_DE_AVANCE
+FROM PROYECTO
+WHERE ID_PROYECTO = 100;
+/*==============================================================*/
 /* TRIGGER CORREO                                               */
 /*==============================================================*/
 
@@ -78,6 +131,30 @@ BEGIN
 
 END;
 /
+
+/*==============================================================*/
+/* PRUEBAS TRIGGER TRG_CORREO                                   */
+/*==============================================================*/
+
+-- Debe generar:
+-- ORA-20001: EL CORREO DEBE SER GMAIL
+
+INSERT INTO USUARIO
+(
+    NOMBRE,
+    DESCRIPCION,
+    CORREO,
+    CONTRASENA,
+    ID_ROL
+)
+VALUES
+(
+    'USUARIO TEST',
+    'PRUEBA TRIGGER',
+    'TEST@OUTLOOK.COM',
+    '123456',
+    1
+);
 
 /*==============================================================*/
 /* TRIGGER FECHA LIMITE TAREA                                   */
@@ -99,6 +176,35 @@ END;
 /
 
 /*==============================================================*/
+/* PRUEBAS TRIGGER TRG_FECHAS                                   */
+/*==============================================================*/
+
+-- Debe generar:
+-- ORA-20002: FECHA LIMITE INVALIDA
+
+INSERT INTO TAREA
+(
+    NOMBRE,
+    DESCRIPCION,
+    FECHA_INICIO,
+    FECHA_LIMITE,
+    ID_ESTADO,
+    ID_PROYECTO,
+    ID_USUARIO_ASIGNA,
+    ID_USUARIO_DESARROLLA
+)
+VALUES
+(
+    'TAREA ERROR',
+    'PRUEBA FECHAS',
+    TO_DATE('20/06/2025','DD/MM/YYYY'),
+    TO_DATE('10/06/2025','DD/MM/YYYY'),
+    1,
+    100,
+    100,
+    101
+);
+/*==============================================================*/
 /* TRIGGER PROYECTO AVANCE                                      */
 /*==============================================================*/
 
@@ -118,6 +224,16 @@ END;
 /
 
 /*==============================================================*/
+/* PRUEBAS TRIGGER TRG_AVANCE                                   */
+/*==============================================================*/
+
+-- Debe generar:
+-- ORA-20003: AVANCE INVALIDO
+
+UPDATE PROYECTO
+SET PORCENTAJE_DE_AVANCE = 150
+WHERE ID_PROYECTO = 100;
+/*==============================================================*/
 /* TRIGGER LONGITUD CONTRASEÑA                                  */
 /*==============================================================*/
 
@@ -136,6 +252,29 @@ BEGIN
 END;
 /
 
+/*==============================================================*/
+/* PRUEBAS TRIGGER TRG_PASSWORD                                 */
+/*==============================================================*/
+
+-- Debe generar:
+-- ORA-20004: PASSWORD MUY CORTA
+
+INSERT INTO USUARIO
+(
+    NOMBRE,
+    DESCRIPCION,
+    CORREO,
+    CONTRASENA,
+    ID_ROL
+)
+VALUES
+(
+    'USER PASSWORD',
+    'PRUEBA PASSWORD',
+    'USERPASSWORD@GMAIL.COM',
+    '123',
+    1
+);
 
 /*==============================================================*/
 /* VISTAS                                                       */
@@ -168,12 +307,19 @@ LEFT JOIN USUARIO U2 ON U2.ID_USUARIO = T.ID_USUARIO_DESARROLLA;
 
 -- 2. Vista de desarrollador (Filtrada por ROL R3)
 CREATE OR REPLACE VIEW V_DESARROLLADOR AS
-SELECT U.NOMBRE AS DESARROLLADOR, T.NOMBRE AS TAREA, E.NOMBRE AS ESTADO, P.NOMBRE AS PROYECTO
+SELECT
+    U.NOMBRE AS DESARROLLADOR,
+    T.NOMBRE AS TAREA,
+    E.NOMBRE AS ESTADO,
+    P.NOMBRE AS PROYECTO
 FROM USUARIO U
-JOIN TAREA T ON T.ID_USUARIO_DESARROLLA = U.ID_USUARIO
-JOIN ESTADO E ON E.ID_ESTADO = T.ID_ESTADO
-JOIN PROYECTO P ON P.ID_PROYECTO = T.ID_PROYECTO
-WHERE U.ID_ROL = 'R3';
+JOIN TAREA T
+    ON T.ID_USUARIO_DESARROLLA = U.ID_USUARIO
+JOIN ESTADO E
+    ON E.ID_ESTADO = T.ID_ESTADO
+JOIN PROYECTO P
+    ON P.ID_PROYECTO = T.ID_PROYECTO
+WHERE U.ID_ROL = 2;
 
 -- 3. Vista de Administrador (Vista de proyectos y reportes)
 CREATE OR REPLACE VIEW V_ADMIN AS
@@ -216,3 +362,72 @@ CREATE ROLE DESARROLLADOR_ROLE;
 GRANT SELECT ON V_DESARROLLADOR TO DESARROLLADOR_ROLE;
 GRANT SELECT ON V_ADMIN TO ADMIN_ROLE;
 GRANT SELECT ON V_USUARIO_TAREA TO LIDER_ROLE;
+
+
+
+/*==============================================================*/
+/* PRUEBAS VISTA VW_TAREAS_PROYECTO                             */
+/*==============================================================*/
+
+SELECT *
+FROM VW_TAREAS_PROYECTO;
+
+/*==============================================================*/
+/* PRUEBAS VISTA V_TAREA_DETALLE                                */
+/*==============================================================*/
+
+SELECT *
+FROM V_TAREA_DETALLE;
+
+/*==============================================================*/
+/* PRUEBAS VISTA V_DESARROLLADOR                                */
+/*==============================================================*/
+
+SELECT *
+FROM V_DESARROLLADOR;
+
+
+
+SELECT ID_USUARIO, NOMBRE, ID_ROL
+FROM USUARIO;
+
+
+SELECT
+    ID_TAREA,
+    NOMBRE,
+    ID_USUARIO_DESARROLLA
+FROM TAREA;
+
+/*==============================================================*/
+/* PRUEBAS VISTA V_ADMIN                                        */
+/*==============================================================*/
+
+SELECT *
+FROM V_ADMIN;
+
+/*==============================================================*/
+/* PRUEBAS VISTA V_USUARIO_TAREA                                */
+/*==============================================================*/
+
+SELECT *
+FROM V_USUARIO_TAREA;
+
+/*==============================================================*/
+/* PRUEBAS ROLES                                                */
+/*==============================================================*/
+
+SELECT *
+FROM USER_ROLE_PRIVS;
+
+/*==============================================================*/
+/* PRUEBAS PRIVILEGIOS                                          */
+/*==============================================================*/
+
+SELECT *
+FROM USER_TAB_PRIVS
+WHERE TABLE_NAME IN
+(
+    'V_DESARROLLADOR',
+    'V_ADMIN',
+    'V_USUARIO_TAREA'
+);
