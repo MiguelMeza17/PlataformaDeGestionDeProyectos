@@ -460,10 +460,9 @@ FROM USER_PROCEDURES;
 /*==============================================================*/
 /* INDICE 1                                                     */
 /*==============================================================*/
-
-CREATE INDEX IDX_USUARIO_CORREO
-ON USUARIO(CORREO);
-
+DROP INDEX IDX_TAREA_ESTADO
+CREATE INDEX IDX_TAREA_ESTADO
+ON TAREA(ID_ESTADO);
 /*==============================================================*/
 /* INDICE 2                                                     */
 /*==============================================================*/

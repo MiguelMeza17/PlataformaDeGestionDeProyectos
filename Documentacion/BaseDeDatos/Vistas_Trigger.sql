@@ -190,7 +190,21 @@ FROM USUARIO U
 JOIN TAREA T ON T.ID_USUARIO_ASIGNA = U.ID_USUARIO OR T.ID_USUARIO_DESARROLLA = U.ID_USUARIO
 JOIN ESTADO E ON E.ID_ESTADO = T.ID_ESTADO
 JOIN PROYECTO P ON P.ID_PROYECTO = T.ID_PROYECTO;
+/*==============================================================*/
+/* DROP GRANTS                                                  */
+/*==============================================================*/
 
+REVOKE SELECT ON V_DESARROLLADOR FROM DESARROLLADOR_ROLE;
+REVOKE SELECT ON V_ADMIN FROM ADMIN_ROLE;
+REVOKE SELECT ON V_USUARIO_TAREA FROM LIDER_ROLE;
+
+/*==============================================================*/
+/* DROP ROLES                                                   */
+/*==============================================================*/
+
+DROP ROLE LIDER_ROLE;
+DROP ROLE ADMIN_ROLE;
+DROP ROLE DESARROLLADOR_ROLE;
 /*==============================================================*/
 /* ROLES Y PERMISOS                                             */
 /*==============================================================*/
