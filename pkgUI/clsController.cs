@@ -153,7 +153,8 @@ namespace GestionDeProyectos.pkgUI
             string prmName,
             string prmDescription,
             DateTime prmFirstDate,
-            DateTime prmLimitDate)
+            DateTime prmLimitDate,
+            clsState prmState)
         {
             clsTask varObj = opGetTask(0,prmName);
 
@@ -165,7 +166,8 @@ namespace GestionDeProyectos.pkgUI
                 prmName,
                 prmDescription,
                 prmFirstDate,
-                prmLimitDate);
+                prmLimitDate,
+                prmState);
 
             return opAssociateTask(newTask);
         }
@@ -242,7 +244,8 @@ namespace GestionDeProyectos.pkgUI
             string prmName,
             string prmDescription,
             DateTime prmFirstDate,
-            DateTime prmLimitDate)
+            DateTime prmLimitDate,
+            clsState prmState)
         {
             clsTask varObj = opGetTask(prmOUID,null);
 
@@ -253,7 +256,8 @@ namespace GestionDeProyectos.pkgUI
                 prmName,
                 prmDescription,
                 prmFirstDate,
-                prmLimitDate
+                prmLimitDate,
+                prmState
             );
         }
         public bool opUpdateReport(
