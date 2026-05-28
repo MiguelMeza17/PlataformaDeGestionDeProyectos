@@ -123,6 +123,7 @@ namespace GestionDeProyectos.pkgDomain
             if (!varItem.opDie()) return false;
             opDisassociateReport(varItem);
          }
+
          return true;
       }
    }

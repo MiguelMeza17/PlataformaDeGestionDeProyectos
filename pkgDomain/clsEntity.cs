@@ -23,6 +23,10 @@ namespace GestionDeProyectos.pkgDomain
         {
             return attOUID;
         }
+        public string opGetDescription()
+        {
+            return attDescription;
+        }
         public virtual bool opDie()
         {
             return true;

@@ -1,6 +1,6 @@
 namespace GestionDeProyectos.pkgDomain
 {
-    public enum clsSate
+    public enum clsState
     {
         ToDevelop,
         InDevelopment,

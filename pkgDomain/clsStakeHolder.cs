@@ -41,5 +41,13 @@ namespace GestionDeProyectos.pkgDomain
 
             return true;
         }
+        public override bool opDie()
+        {
+            
+            attTasks.Clear();
+
+            
+            return base.opDie();
+        }
     }
 }
