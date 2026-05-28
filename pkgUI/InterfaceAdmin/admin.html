@@ -2,13 +2,40 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel Administrador - Reportes y Avance</title>
+    <title>Panel Administrador - Gestión Completa</title>
     <link rel="stylesheet" href="admin.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <h1 style="text-align: center; color: white; margin-top: 20px;">💼 PANEL DE CONTROL DE ADMINISTRADOR</h1>
+    
     <div class="admin-grid">
         
+        <section class="card">
+            <h2>📁 Registrar / Editar Proyecto</h2>
+            <form id="projectForm">
+                <input type="hidden" id="pOuid" value="0">
+                
+                <input type="text" id="pName" placeholder="Nombre del Proyecto" required>
+                <textarea id="pDesc" placeholder="Descripción del proyecto..."></textarea>
+                
+                <label>Fecha de Inicio:</label>
+                <input type="date" id="pStartDate" required>
+                
+                <label>Fecha de Finalización:</label>
+                <input type="date" id="pEndDate" required>
+                
+                <label>Estado General:</label>
+                <select id="pState" style="width: 100%; padding: 10px; margin-bottom: 15px; background: #1a1e29; color: white; border: 1px solid #34495e; border-radius: 4px;">
+                    <option value="Sin Iniciar">Sin Iniciar</option>
+                    <option value="En Proceso">En Proceso</option>
+                    <option value="Terminado">Terminado</option>
+                </select>
+                
+                <button type="submit" class="btn-primary">Guardar Proyecto en Oracle</button>
+            </form>
+        </section>
+
         <section class="card">
             <h2>📝 Generar Reporte Oficial</h2>
             <form id="reportForm">
@@ -20,22 +47,28 @@
                 <input type="date" id="rDate" required>
                 
                 <textarea id="rSummary" placeholder="Resumen del progreso..."></textarea>
-                <textarea id="rRetarded" placeholder="Tareas retrasadas / Obstáculos..."></textarea>
+                <input type="number" id="rRetarded" placeholder="Número de tareas retrasadas" required min="0">
                 
-                <button type="submit" class="btn-primary">Guardar y Notificar</button>
+                <button type="submit" class="btn-primary" style="background-color: #e67e22;">Guardar y Notificar Reporte</button>
             </form>
         </section>
 
-        <section class="card stats-section">
-            <h2>📊 Estado del Proyecto</h2>
-            <div class="progress-circle">
-                <span id="percentageText">0%</span>
+        <section class="card stats-section" style="grid-column: span 2;">
+            <h2>📊 Estado General de Proyectos (Oracle)</h2>
+            <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap;">
+                <div class="progress-circle">
+                    <span id="percentageText">0%</span>
+                </div>
+                <div class="chart-container" style="position: relative; height:200px; width:250px">
+                    <canvas id="taskChart"></canvas>
+                </div>
             </div>
-            <p>Porcentaje de tareas terminadas</p>
-            
-            <div class="chart-container">
-                <canvas id="taskChart"></canvas>
-            </div>
+        </section>
+
+        <section class="card" style="grid-column: span 2;">
+            <h2>📁 Proyectos Existentes en la Base de Datos</h2>
+            <div id="listaProyectos" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 15px;">
+                </div>
         </section>
 
     </div>

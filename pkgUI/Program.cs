@@ -1,4 +1,5 @@
-﻿using System;
+﻿// 🌟 ASEGÚRATE DE QUE ESTAS LÍNEAS ESTÉN AL INICIO DE TU PROGRAM.CS
+using System;
 using System.IO;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using GestionDeProyectos.pkgDomain;
 using GestionDeProyectos.pkgUI;
 
+// ... (Todo el resto de tu código de WebApplication, app.MapPost, etc. se mantiene igual)
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
     Args = args,
@@ -37,6 +39,10 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(rutaPkgUI),
     RequestPath = "/pkgUI" 
 });
+
+// ==========================================
+// ENDPOINTS DE AUTENTICACIÓN Y USUARIOS
+// ==========================================
 
 app.MapPost("/api/login", (LoginDTO datos) => {
     try 
@@ -88,8 +94,108 @@ app.MapPost("/api/registrar", (UsuarioRegistroDTO datos) => {
     }
 });
 
+// ==============================================================================
+// 🌟 NUEVO: ENDPOINTS PARA EL CRUD DE PROYECTOS (LLAMANDO A PKG_PROYECTO DESDE ORACLE)
+// ==============================================================================
+
+app.MapGet("/api/proyectos/listar", () => {
+    try
+    {
+        var vrmController = clsController.opGetInstance();
+        var vrmListaProyectos = vrmController.opListAllProjects();
+        return Results.Ok(vrmListaProyectos);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error al listar proyectos: " + ex.Message);
+    }
+});
+
+app.MapPost("/api/proyectos/crear", (clsCrearProyectoDTO prmDatos) => {
+    try
+    {
+        var vrmController = clsController.opGetInstance();
+        bool vrmExito = vrmController.opRegisterProject(
+            0, 
+            prmDatos.nombre,
+            prmDatos.descripcion,
+            prmDatos.fechaInicio,
+            prmDatos.fechaFinalizacion,
+            prmDatos.estadoGeneral,
+            prmDatos.porcentajeAvance
+        );
+
+        if (vrmExito)
+            return Results.Ok(new { mensaje = "✅ Proyecto registrado exitosamente en Oracle." });
+        else
+            return Results.BadRequest(new { mensaje = "❌ Error al registrar el proyecto. Verifique duplicados." });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error interno al crear proyecto: " + ex.Message);
+    }
+});
+
+app.MapPut("/api/proyectos/actualizar", (clsActualizarProyectoDTO prmDatos) => {
+    try
+    {
+        var vrmController = clsController.opGetInstance();
+        bool vrmExito = vrmController.opUpdateProject(
+            prmDatos.idProyecto,
+            prmDatos.nombre,
+            prmDatos.descripcion,
+            prmDatos.fechaInicio,
+            prmDatos.fechaFinalizacion,
+            prmDatos.estadoGeneral,
+            prmDatos.porcentajeAvance
+        );
+
+        if (vrmExito)
+            return Results.Ok(new { mensaje = "✅ Proyecto actualizado correctamente en Oracle." });
+        else
+            return Results.BadRequest(new { mensaje = "❌ No se pudo actualizar el proyecto. Verifique el ID." });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error interno al actualizar proyecto: " + ex.Message);
+    }
+});
+
+app.MapDelete("/api/proyectos/eliminar/{id:int}", (int id) => {
+    try
+    {
+        var vrmController = clsController.opGetInstance();
+        bool vrmExito = vrmController.opDeleteProject(id);
+
+        if (vrmExito)
+            return Results.Ok(new { mensaje = "✅ Proyecto eliminado correctamente de Oracle." });
+        else
+            return Results.BadRequest(new { mensaje = "❌ No se pudo eliminar el proyecto." });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error interno al eliminar proyecto: " + ex.Message);
+    }
+});
+
+// ==========================================
+// ARRANQUE DEL SERVIDOR
+// ==========================================
+
 Console.WriteLine("Servidor iniciado en http://localhost:5000");
 app.Run("http://localhost:5000");
 
+// ==========================================
+// OBJETOS DE TRANSFERENCIA DE DATOS (DTOs)
+// ==========================================
+
 public record LoginDTO(string nombre, string password);
-public record UsuarioRegistroDTO(string id, string nombre, string email, string password, string rol);
+public record UsuarioRegistroDTO(string nombre, string email, string password, string rol);
+
+// DTOs para Proyectos
+public record clsCrearProyectoDTO(string nombre, string descripcion, DateTime fechaInicio, DateTime fechaFinalizacion, string estadoGeneral, float porcentajeAvance);
+public record clsActualizarProyectoDTO(int idProyecto, string nombre, string descripcion, DateTime fechaInicio, DateTime fechaFinalizacion, string estadoGeneral, float porcentajeAvance);
+
+
+//opcional
+// DTOs necesarios para mapear las entradas JSON del Administrador

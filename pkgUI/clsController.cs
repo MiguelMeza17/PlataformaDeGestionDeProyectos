@@ -16,7 +16,10 @@ namespace GestionDeProyectos.pkgUI
         private List<clsStakeholder> attStakeholders = new List<clsStakeholder>();
         private List<clsProject> attProjects = new List<clsProject>();
         private List<clsTask> attTasks = new List<clsTask>();
-
+        public List<clsProject> opListAllProjects()
+        {
+        return attProjects;
+        }
     private clsController()
     {
 
@@ -36,6 +39,12 @@ namespace GestionDeProyectos.pkgUI
             clsStakeholder varObj = new clsStakeholder(id, name, desc, email, pass, rolEnum);
             attStakeholders.Add(varObj);
         });
+        attProjects.Clear();
+    clsProjectData.opLoadProjects((id, name, desc, start, end, state, advance) =>
+    {
+        clsProject varProj = new clsProject(id, name, desc, start, end, state, advance);
+        attProjects.Add(varProj);
+    });
     }
 
         public static clsController opGetInstance()
@@ -71,15 +80,16 @@ namespace GestionDeProyectos.pkgUI
             if (varObj != null) 
                 return false;
 
-            clsProject newProject = new clsProject(
-                prmOUID,
-                prmName,
-                prmDescription,
-                prmStartingDate,
-                prmEndingDate,
-                prmGeneralState,
-                prmAdvancePercentage
-            );
+            bool vrmDbSuccess = clsProjectData.opInsertarProyecto(
+        prmName, prmDescription, prmStartingDate, prmEndingDate, prmGeneralState, prmAdvancePercentage
+    );
+
+        if (!vrmDbSuccess) return false;
+
+
+        clsProject newProject = new clsProject(
+            prmOUID, prmName, prmDescription, prmStartingDate, prmEndingDate, prmGeneralState, prmAdvancePercentage
+        );
                 return opAssociateProject(newProject);
         }
 
@@ -194,28 +204,35 @@ namespace GestionDeProyectos.pkgUI
         }
 
         public bool opUpdateProject(
-            int prmOUID,
-            string prmName,
-            string prmDescription,
-            DateTime prmStartingDate,
-            DateTime prmEndingDate,
-            string prmGeneralState,
-            float prmAdvancePercentage)
+        int prmOUID,
+        string prmName,
+        string prmDescription,
+        DateTime prmStartingDate,
+        DateTime prmEndingDate,
+        string prmGeneralState,
+        float prmAdvancePercentage)
         {
-            clsProject varObj = opGetProject(prmOUID,null);
+        clsProject varObj = opGetProject(prmOUID, null);
+        if (varObj == null)
+            return false;
 
-            if (varObj == null)
-                return false;
+        // 🌟 PASO 1: Actualizar en Oracle llamando al Paquete
+        bool vrmDbSuccess = clsProjectData.opActualizarProyecto(
+            prmOUID, prmName, prmDescription, prmStartingDate, prmEndingDate, prmGeneralState, prmAdvancePercentage
+        );
 
-            return varObj.opModify(
-                prmName,
-                prmDescription,
-                prmStartingDate,
-                prmEndingDate,
-                prmGeneralState,
-                prmAdvancePercentage
-            );
-        }
+        if (!vrmDbSuccess) return false;
+
+        // 🌟 PASO 2: Modificar los datos en la memoria local
+        return varObj.opModify(
+            prmName,
+            prmDescription,
+            prmStartingDate,
+            prmEndingDate,
+            prmGeneralState,
+            prmAdvancePercentage
+    );
+}
         public bool opUpdateStakeholder(
             int prmOUID,
             string prmName,
@@ -280,12 +297,18 @@ namespace GestionDeProyectos.pkgUI
             );
         }
         public bool opDeleteProject(int prmOUID)
-        {
-            clsProject varObj = opGetProject(prmOUID,null);
-            if(varObj == null) return false;
-            if(!varObj.opDie()) return false;
-            return opDisassociateProject(varObj);
-        }
+    {
+    clsProject varObj = opGetProject(prmOUID, null);
+    if (varObj == null) return false;
+
+    // 🌟 PASO 1: Eliminar en Oracle llamando al Paquete
+    bool vrmDbSuccess = clsProjectData.opEliminarProyecto(prmOUID);
+    if (!vrmDbSuccess) return false;
+
+    // 🌟 PASO 2: Remover de la memoria local
+    if (!varObj.opDie()) return false;
+    return opDisassociateProject(varObj);
+    }
         public bool opDeleteStakeholder(int prmOUID)
         {
             clsStakeholder varObj = opGetStakeholder(prmOUID,null);

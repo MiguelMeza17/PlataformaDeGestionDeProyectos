@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using Oracle.ManagedDataAccess.Client;
 
 #nullable disable
@@ -63,6 +64,100 @@ namespace GestionDeProyectos.pkgData
                             "Error al cargar proyectos desde Oracle: "
                             + ex.Message
                         );
+                    }
+                }
+            }
+        }
+        // 2. CREAR (CREATE): Llama a PKG_PROYECTO.INSERTAR
+        public static bool opInsertarProyecto(string prmNom, string prmDesc, DateTime prmFi, DateTime prmFf, string prmEg, float prmAv)
+        {
+            string vrmProcedure = "PKG_PROYECTO.INSERTAR";
+
+            using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
+            {
+                using (OracleCommand vrmCmd = new OracleCommand(vrmProcedure, vrmConn))
+                {
+                    vrmCmd.CommandType = CommandType.StoredProcedure;
+
+                    // Mapeo de parámetros con los nombres exactos de tu paquete en Oracle
+                    vrmCmd.Parameters.Add(new OracleParameter("p_nom", OracleDbType.Varchar2)).Value = prmNom;
+                    vrmCmd.Parameters.Add(new OracleParameter("p_desc", OracleDbType.Varchar2)).Value = prmDesc;
+                    vrmCmd.Parameters.Add(new OracleParameter("p_fi", OracleDbType.Date)).Value = prmFi;
+                    vrmCmd.Parameters.Add(new OracleParameter("p_ff", OracleDbType.Date)).Value = prmFf;
+                    vrmCmd.Parameters.Add(new OracleParameter("p_eg", OracleDbType.Varchar2)).Value = prmEg;
+                    vrmCmd.Parameters.Add(new OracleParameter("p_av", OracleDbType.Single)).Value = prmAv;
+
+                    try
+                    {
+                        vrmConn.Open();
+                        vrmCmd.ExecuteNonQuery(); // Ejecuta el procedimiento almacenado
+                        return true; // Si no hay excepción, asumimos éxito debido al COMMIT del paquete
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error al insertar proyecto vía Paquete: " + ex.Message);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // 3. ACTUALIZAR (UPDATE): Llama a PKG_PROYECTO.ACTUALIZAR
+        public static bool opActualizarProyecto(int prmId, string prmNom, string prmDesc, DateTime prmFi, DateTime prmFf, string prmEg, float prmAv)
+        {
+            string vrmProcedure = "PKG_PROYECTO.ACTUALIZAR";
+
+            using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
+            {
+                using (OracleCommand vrmCmd = new OracleCommand(vrmProcedure, vrmConn))
+                {
+                    vrmCmd.CommandType = CommandType.StoredProcedure;
+
+                    vrmCmd.Parameters.Add(new OracleParameter("p_id", OracleDbType.Int32)).Value = prmId;
+                    vrmCmd.Parameters.Add(new OracleParameter("p_nom", OracleDbType.Varchar2)).Value = prmNom;
+                    vrmCmd.Parameters.Add(new OracleParameter("p_desc", OracleDbType.Varchar2)).Value = prmDesc;
+                    vrmCmd.Parameters.Add(new OracleParameter("p_fi", OracleDbType.Date)).Value = prmFi;
+                    vrmCmd.Parameters.Add(new OracleParameter("p_ff", OracleDbType.Date)).Value = prmFf;
+                    vrmCmd.Parameters.Add(new OracleParameter("p_eg", OracleDbType.Varchar2)).Value = prmEg;
+                    vrmCmd.Parameters.Add(new OracleParameter("p_av", OracleDbType.Single)).Value = prmAv;
+
+                    try
+                    {
+                        vrmConn.Open();
+                        vrmCmd.ExecuteNonQuery();
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error al actualizar proyecto vía Paquete: " + ex.Message);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // 4. ELIMINAR (DELETE): Llama a PKG_PROYECTO.ELIMINAR
+        public static bool opEliminarProyecto(int prmId)
+        {
+            string vrmProcedure = "PKG_PROYECTO.ELIMINAR";
+
+            using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
+            {
+                using (OracleCommand vrmCmd = new OracleCommand(vrmProcedure, vrmConn))
+                {
+                    vrmCmd.CommandType = CommandType.StoredProcedure;
+                    vrmCmd.Parameters.Add(new OracleParameter("p_id", OracleDbType.Int32)).Value = prmId;
+
+                    try
+                    {
+                        vrmConn.Open();
+                        vrmCmd.ExecuteNonQuery();
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error al eliminar proyecto vía Paquete: " + ex.Message);
+                        return false;
                     }
                 }
             }
