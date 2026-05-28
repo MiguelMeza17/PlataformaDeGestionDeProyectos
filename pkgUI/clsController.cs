@@ -20,32 +20,34 @@ namespace GestionDeProyectos.pkgUI
         {
         return attProjects;
         }
-    private clsController()
-    {
-
-        attStakeholders.Clear();
-
-        clsStakeholderData.opLoadStakeholders((id, name, desc, email, pass, rolStr) =>
+        private clsController()
         {
-            clsRoles rolEnum = clsRoles.Developer;
 
-            if (rolStr == "0")
-                rolEnum = clsRoles.Admin;
-            else if (rolStr == "1")
-                rolEnum = clsRoles.Manager;
-            else if (rolStr == "2")
-                rolEnum = clsRoles.Developer;
+            attStakeholders.Clear();
 
-            clsStakeholder varObj = new clsStakeholder(id, name, desc, email, pass, rolEnum);
-            attStakeholders.Add(varObj);
-        });
-        attProjects.Clear();
-    clsProjectData.opLoadProjects((id, name, desc, start, end, state, advance) =>
-    {
-        clsProject varProj = new clsProject(id, name, desc, start, end, state, advance);
-        attProjects.Add(varProj);
-    });
-    }
+            clsStakeholderData.opLoadStakeholders((id, name, desc, email, pass, rolStr) =>
+            {
+                clsRoles rolEnum = clsRoles.Developer;
+
+                if (rolStr == "0")
+                    rolEnum = clsRoles.Admin;
+                else if (rolStr == "1")
+                    rolEnum = clsRoles.Manager;
+                else if (rolStr == "2")
+                    rolEnum = clsRoles.Developer;
+
+                clsStakeholder varObj = new clsStakeholder(id, name, desc, email, pass, rolEnum);
+                attStakeholders.Add(varObj);
+            });
+
+            attProjects.Clear();
+            
+            clsProjectData.opLoadProjects((id, name, desc, start, end, state, advance) =>
+            {
+                clsProject varProj = new clsProject(id, name, desc, start, end, state, advance);
+                attProjects.Add(varProj);
+            });
+        }
 
         public static clsController opGetInstance()
         {
@@ -81,80 +83,85 @@ namespace GestionDeProyectos.pkgUI
                 return false;
 
             bool vrmDbSuccess = clsProjectData.opInsertarProyecto(
-        prmName, prmDescription, prmStartingDate, prmEndingDate, prmGeneralState, prmAdvancePercentage
-    );
+                                        prmName, prmDescription, 
+                                        prmStartingDate, prmEndingDate, 
+                                        prmGeneralState, prmAdvancePercentage
+                                    );
 
-        if (!vrmDbSuccess) return false;
+            if (!vrmDbSuccess) return false;
 
 
-        clsProject newProject = new clsProject(
-            prmOUID, prmName, prmDescription, prmStartingDate, prmEndingDate, prmGeneralState, prmAdvancePercentage
-        );
-                return opAssociateProject(newProject);
+            clsProject newProject = new clsProject(
+                prmOUID, prmName, prmDescription, 
+                prmStartingDate, prmEndingDate, 
+                prmGeneralState, prmAdvancePercentage
+            );
+
+            return opAssociateProject(newProject);
         }
 
-    public bool opRegisterStakeholder(
-        string prmName,
-        string prmDescription,
-        string prmEmail,
-        string prmPassword,
-        clsRoles prmRol)
-    {
-        clsStakeholder varObj = opGetStakeholder(0, prmEmail);
-        if (varObj != null) return false;
-
-        using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
+        public bool opRegisterStakeholder(
+            string prmName,
+            string prmDescription,
+            string prmEmail,
+            string prmPassword,
+            clsRoles prmRol)
         {
-            try
+            clsStakeholder varObj = opGetStakeholder(0, prmEmail);
+            if (varObj != null) return false;
+
+            using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
             {
-                vrmConn.Open();
-
-                string sql = @"INSERT INTO USUARIO 
-                (NOMBRE, DESCRIPCION, CORREO, CONTRASENA, ID_ROL) 
-                VALUES (:name, :description, :email, :password, :rol) 
-                RETURNING ID_USUARIO INTO :prmId";
-
-                using (OracleCommand vrmCmd = new OracleCommand(sql, vrmConn))
+                try
                 {
-                    vrmCmd.Parameters.Add("name", OracleDbType.Varchar2).Value = prmName;
-                    vrmCmd.Parameters.Add("description", OracleDbType.Varchar2).Value = prmDescription;
-                    vrmCmd.Parameters.Add("email", OracleDbType.Varchar2).Value = prmEmail;
-                    vrmCmd.Parameters.Add("password", OracleDbType.Varchar2).Value = prmPassword;
-                    vrmCmd.Parameters.Add("rol", OracleDbType.Int32).Value = prmRol;
+                    vrmConn.Open();
 
-                    OracleParameter outParam = new OracleParameter("prmId", OracleDbType.Int32)
+                    string sql = @"INSERT INTO USUARIO 
+                    (NOMBRE, DESCRIPCION, CORREO, CONTRASENA, ID_ROL) 
+                    VALUES (:name, :description, :email, :password, :rol) 
+                    RETURNING ID_USUARIO INTO :prmId";
+
+                    using (OracleCommand vrmCmd = new OracleCommand(sql, vrmConn))
                     {
-                        Direction = ParameterDirection.Output
-                    };
+                        vrmCmd.Parameters.Add("name", OracleDbType.Varchar2).Value = prmName;
+                        vrmCmd.Parameters.Add("description", OracleDbType.Varchar2).Value = prmDescription;
+                        vrmCmd.Parameters.Add("email", OracleDbType.Varchar2).Value = prmEmail;
+                        vrmCmd.Parameters.Add("password", OracleDbType.Varchar2).Value = prmPassword;
+                        vrmCmd.Parameters.Add("rol", OracleDbType.Int32).Value = prmRol;
 
-                    vrmCmd.Parameters.Add(outParam);
+                        OracleParameter outParam = new OracleParameter("prmId", OracleDbType.Int32)
+                        {
+                            Direction = ParameterDirection.Output
+                        };
 
-                    if (vrmCmd.ExecuteNonQuery() > 0)
-                    {
-                        int prmOUID = Convert.ToInt32(outParam.Value.ToString());
+                        vrmCmd.Parameters.Add(outParam);
 
-                        clsStakeholder newStakeholder = new clsStakeholder(
-                            prmOUID,
-                            prmName,
-                            prmDescription,
-                            prmEmail,
-                            prmPassword,
-                            prmRol
-                        );
+                        if (vrmCmd.ExecuteNonQuery() > 0)
+                        {
+                            int prmOUID = Convert.ToInt32(outParam.Value.ToString());
 
-                        return opAssociateStakeholder(newStakeholder);
+                            clsStakeholder newStakeholder = new clsStakeholder(
+                                prmOUID,
+                                prmName,
+                                prmDescription,
+                                prmEmail,
+                                prmPassword,
+                                prmRol
+                            );
+
+                            return opAssociateStakeholder(newStakeholder);
+                        }
+
+                        return false;
                     }
-
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error en opRegisterStakeholder: " + ex.Message);
                     return false;
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error en opRegisterStakeholder: " + ex.Message);
-                return false;
-            }
         }
-    }
 
 
 
@@ -214,27 +221,25 @@ namespace GestionDeProyectos.pkgUI
         string prmGeneralState,
         float prmAdvancePercentage)
         {
-        clsProject varObj = opGetProject(prmOUID, null);
-        if (varObj == null)
-            return false;
+            clsProject varObj = opGetProject(prmOUID, null);
+            if (varObj == null)
+                return false;
 
-        // 🌟 PASO 1: Actualizar en Oracle llamando al Paquete
-        bool vrmDbSuccess = clsProjectData.opActualizarProyecto(
-            prmOUID, prmName, prmDescription, prmStartingDate, prmEndingDate, prmGeneralState, prmAdvancePercentage
-        );
+            bool vrmDbSuccess = clsProjectData.opActualizarProyecto(
+                prmOUID, prmName, prmDescription, prmStartingDate, prmEndingDate, prmGeneralState, prmAdvancePercentage
+            );
 
-        if (!vrmDbSuccess) return false;
+            if (!vrmDbSuccess) return false;
 
-        // 🌟 PASO 2: Modificar los datos en la memoria local
-        return varObj.opModify(
-            prmName,
-            prmDescription,
-            prmStartingDate,
-            prmEndingDate,
-            prmGeneralState,
-            prmAdvancePercentage
-    );
-}
+            return varObj.opModify(
+                prmName,
+                prmDescription,
+                prmStartingDate,
+                prmEndingDate,
+                prmGeneralState,
+                prmAdvancePercentage
+            );
+        }
         public bool opUpdateStakeholder(
             int prmOUID,
             string prmName,
@@ -301,18 +306,16 @@ namespace GestionDeProyectos.pkgUI
             );
         }
         public bool opDeleteProject(int prmOUID)
-    {
-    clsProject varObj = opGetProject(prmOUID, null);
-    if (varObj == null) return false;
+        {
+            clsProject varObj = opGetProject(prmOUID, null);
+            if (varObj == null) return false;
 
-    // 🌟 PASO 1: Eliminar en Oracle llamando al Paquete
-    bool vrmDbSuccess = clsProjectData.opEliminarProyecto(prmOUID);
-    if (!vrmDbSuccess) return false;
+            bool vrmDbSuccess = clsProjectData.opEliminarProyecto(prmOUID);
+            if (!vrmDbSuccess) return false;
 
-    // 🌟 PASO 2: Remover de la memoria local
-    if (!varObj.opDie()) return false;
-    return opDisassociateProject(varObj);
-    }
+            if (!varObj.opDie()) return false;
+            return opDisassociateProject(varObj);
+        }
         public bool opDeleteStakeholder(int prmOUID)
         {
             clsStakeholder varObj = opGetStakeholder(prmOUID,null);

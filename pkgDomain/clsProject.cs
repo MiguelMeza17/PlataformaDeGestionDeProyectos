@@ -11,6 +11,7 @@ namespace GestionDeProyectos.pkgDomain
       private DateTime attEndingDate;
       private string attGeneralState;
       private float attAdvancePercentage;
+      private List<clsTask> attTasks;
 
       private List<clsReport> attReports = new List<clsReport>();
 
@@ -30,6 +31,7 @@ namespace GestionDeProyectos.pkgDomain
          attAdvancePercentage = prmAdvancePercentage;
 
          attReports = new List<clsReport>();
+         attTasks = new List<clsTask>();
       }
 
       public bool opRegisterReport(
@@ -118,7 +120,7 @@ namespace GestionDeProyectos.pkgDomain
       }
       public override bool opDie()
       {
-         foreach (clsReport varItem in attReports)//si falla le ponemos attReports.ToList()
+         foreach (clsReport varItem in attReports)
          {
             if (!varItem.opDie()) return false;
             opDisassociateReport(varItem);
