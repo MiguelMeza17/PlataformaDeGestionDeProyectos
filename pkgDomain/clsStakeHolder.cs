@@ -20,8 +20,8 @@ namespace GestionDeProyectos.pkgDomain
             attRol = prmRol;
             attTasks = new List<clsTask>();
         } 
-        public string GetNombre() { return attName; }
-        public clsRoles GetRol() { return attRol; }
+        public clsRoles opGetRol() { return attRol; }
+        public string opGetPassword() { return attPassword; }
         public bool opCompareCredentials(string prmEmail, string prmPassword)
         {
             return attEmail.Trim() == prmEmail.Trim() && attPassword == prmPassword;
@@ -45,6 +45,14 @@ namespace GestionDeProyectos.pkgDomain
         {           
             attTasks.Clear();         
             return true;
+        }
+        public List<clsTask> opListTasksByDeveloper()
+        {
+            return attTasks;
+        }
+        public void opAddTask(clsTask prmTask)
+        {
+            attTasks.Add(prmTask);
         }
     }
 }
