@@ -7,7 +7,9 @@ namespace GestionDeProyectos.pkgDomain
         protected int attOUID;
         protected string attName;
         protected string attDescription;
-
+        public int OUID => opGetOUID();
+        public string Name => opGetName();
+        public string Description => opGetDescription();
         public clsEntity(int prmOUID, string prmName, string prmDescription)
         {
             attOUID = prmOUID;

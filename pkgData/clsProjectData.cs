@@ -1,7 +1,7 @@
 using System;
 using System.Data;
 using Oracle.ManagedDataAccess.Client;
-
+using Oracle.ManagedDataAccess.Types;
 #nullable disable
 
 namespace GestionDeProyectos.pkgData
@@ -45,8 +45,10 @@ namespace GestionDeProyectos.pkgData
                                 string vrmEstadoGeneral = vrmReader["ESTADO_GENERAL"]?.ToString() ?? string.Empty;
 
                                 float vrmPorcentajeAvance = Convert.ToSingle(vrmReader["PORCENTAJE_DE_AVANCE"]);
-
-                                prmRegisterAction(
+                                Console.WriteLine(
+                                $"ID={vrmIDProyecto} Nombre={vrmNombre}"
+                                );
+                                    prmRegisterAction(
                                     vrmIDProyecto,
                                     vrmNombre,
                                     vrmDescripcion,
@@ -69,38 +71,81 @@ namespace GestionDeProyectos.pkgData
             }
         }
         // 2. CREAR (CREATE): Llama a PKG_PROYECTO.INSERTAR
-        public static bool opInsertarProyecto(string prmNom, string prmDesc, DateTime prmFi, DateTime prmFf, string prmEg, float prmAv)
+        public static int opInsertarProyecto(
+        string prmNom,
+        string prmDesc,
+        DateTime prmFi,
+        DateTime prmFf,
+        string prmEg,
+        float prmAv)
         {
-            string vrmProcedure = "PKG_PROYECTO.INSERTAR";
+        string vrmProcedure = "PKG_PROYECTO.INSERTAR";
 
-            using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
+        using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
+        {
+        using (OracleCommand vrmCmd = new OracleCommand(vrmProcedure, vrmConn))
+        {
+            vrmCmd.CommandType = CommandType.StoredProcedure;
+
+            // Parámetros de entrada
+            vrmCmd.Parameters.Add(
+                new OracleParameter("p_nom", OracleDbType.Varchar2)
+            ).Value = prmNom;
+
+            vrmCmd.Parameters.Add(
+                new OracleParameter("p_desc", OracleDbType.Varchar2)
+            ).Value = prmDesc;
+
+            vrmCmd.Parameters.Add(
+                new OracleParameter("p_fi", OracleDbType.Date)
+            ).Value = prmFi;
+
+            vrmCmd.Parameters.Add(
+                new OracleParameter("p_ff", OracleDbType.Date)
+            ).Value = prmFf;
+
+            vrmCmd.Parameters.Add(
+                new OracleParameter("p_eg", OracleDbType.Varchar2)
+            ).Value = prmEg;
+
+            vrmCmd.Parameters.Add(
+                new OracleParameter("p_av", OracleDbType.Single)
+            ).Value = prmAv;
+
+            // Parámetro OUT
+            OracleParameter vrmOutId =
+                new OracleParameter("p_id", OracleDbType.Int32);
+
+            vrmOutId.Direction = ParameterDirection.Output;
+
+            vrmCmd.Parameters.Add(vrmOutId);
+
+            try
             {
-                using (OracleCommand vrmCmd = new OracleCommand(vrmProcedure, vrmConn))
-                {
-                    vrmCmd.CommandType = CommandType.StoredProcedure;
+                vrmConn.Open();
 
-                    // Mapeo de parámetros con los nombres exactos de tu paquete en Oracle
-                    vrmCmd.Parameters.Add(new OracleParameter("p_nom", OracleDbType.Varchar2)).Value = prmNom;
-                    vrmCmd.Parameters.Add(new OracleParameter("p_desc", OracleDbType.Varchar2)).Value = prmDesc;
-                    vrmCmd.Parameters.Add(new OracleParameter("p_fi", OracleDbType.Date)).Value = prmFi;
-                    vrmCmd.Parameters.Add(new OracleParameter("p_ff", OracleDbType.Date)).Value = prmFf;
-                    vrmCmd.Parameters.Add(new OracleParameter("p_eg", OracleDbType.Varchar2)).Value = prmEg;
-                    vrmCmd.Parameters.Add(new OracleParameter("p_av", OracleDbType.Single)).Value = prmAv;
+vrmCmd.ExecuteNonQuery();
+vrmCmd.ExecuteNonQuery();
 
-                    try
-                    {
-                        vrmConn.Open();
-                        vrmCmd.ExecuteNonQuery(); // Ejecuta el procedimiento almacenado
-                        return true; // Si no hay excepción, asumimos éxito debido al COMMIT del paquete
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Error al insertar proyecto vía Paquete: " + ex.Message);
-                        return false;
-                    }
-                }
+Console.WriteLine("Tipo: " + vrmOutId.Value.GetType());
+Console.WriteLine("Valor: " + vrmOutId.Value);
+
+return ((OracleDecimal)vrmOutId.Value).ToInt32();
+Console.WriteLine("ID generado: " + vrmOutId.Value);
+
+return ((OracleDecimal)vrmOutId.Value).ToInt32();
             }
+            catch (Exception ex)
+{
+    Console.WriteLine("================================");
+    Console.WriteLine(ex.Message);
+    Console.WriteLine(ex.StackTrace);
+    Console.WriteLine("================================");
+    return 0;
+}
         }
+    }
+}
 
         // 3. ACTUALIZAR (UPDATE): Llama a PKG_PROYECTO.ACTUALIZAR
         public static bool opActualizarProyecto(int prmId, string prmNom, string prmDesc, DateTime prmFi, DateTime prmFf, string prmEg, float prmAv)

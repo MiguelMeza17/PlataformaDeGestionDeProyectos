@@ -13,8 +13,15 @@ namespace GestionDeProyectos.pkgDomain
       private float attAdvancePercentage;
 
       private List<clsReport> attReports = new List<clsReport>();
-
-      public clsProject(
+      // Añade esto dentro de tu clase clsProject en pkgDomain/clsProject.cs
+      public int OUID => opGetOUID(); 
+      public string Name => opGetName(); 
+      public string Description => opGetDescription();
+      
+      public DateTime StartingDate => attStartingDate;
+      public DateTime EndingDate => attEndingDate;
+      public string GeneralState => attGeneralState;
+      public float AdvancePercentage => attAdvancePercentage;      public clsProject(
          int prmOUID,
          string prmName,
          string prmDescription,

@@ -8,7 +8,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http;
 using GestionDeProyectos.pkgDomain;
 using GestionDeProyectos.pkgUI;
-
+using Oracle.ManagedDataAccess.Types;
 // ... (Todo el resto de tu código de WebApplication, app.MapPost, etc. se mantiene igual)
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -177,7 +177,84 @@ app.MapDelete("/api/proyectos/eliminar/{id:int}", (int id) => {
         return Results.Problem("Error interno al eliminar proyecto: " + ex.Message);
     }
 });
+// ==============================================================================
+// 🌟 NUEVO: ENDPOINTS PARA REPORTES ANALÍTICOS (PL/SQL VIA DBMS_OUTPUT)
+// ==============================================================================
 
+app.MapGet("/api/reportes/listar", () => {
+    try
+    {
+        var vrmController = clsController.opGetInstance();
+        var vrmDatos = vrmController.opGetReporteListarProyectos();
+        return Results.Ok(vrmDatos);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error al generar reporte de listado: " + ex.Message);
+    }
+});
+
+app.MapGet("/api/reportes/conteo", () => {
+    try
+    {
+        var vrmController = clsController.opGetInstance();
+        var vrmDatos = vrmController.opGetReporteConteoReportes();
+        return Results.Ok(vrmDatos);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error al generar reporte de conteo: " + ex.Message);
+    }
+});
+
+app.MapGet("/api/reportes/promedio", () => {
+    try
+    {
+        var vrmController = clsController.opGetInstance();
+        var vrmDatos = vrmController.opGetReportePromedioAvance();
+        return Results.Ok(vrmDatos);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error al generar reporte de promedios: " + ex.Message);
+    }
+});
+app.MapPost("/api/reportes/crear", (clsCrearReporteDTO prmDatos) =>
+{
+    try
+    {
+        var vrmController = clsController.opGetInstance();
+
+        bool vrmExito = vrmController.opRegisterReport(
+    prmDatos.idProyecto,
+    0,
+    prmDatos.nombre,
+    prmDatos.descripcion,
+    prmDatos.fecha,
+    prmDatos.resumenAvance,
+    prmDatos.tareasRetrasadas
+        );
+
+        if (vrmExito)
+        {
+            return Results.Ok(new
+            {
+                mensaje = "Reporte registrado correctamente."
+            });
+        }
+
+        return Results.BadRequest(new
+        {
+            mensaje = "No fue posible registrar el reporte."
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(
+            "Error al registrar reporte: " + ex.Message
+        );
+    }
+});
 // ==========================================
 // ARRANQUE DEL SERVIDOR
 // ==========================================
@@ -188,7 +265,14 @@ app.Run("http://localhost:5000");
 // ==========================================
 // OBJETOS DE TRANSFERENCIA DE DATOS (DTOs)
 // ==========================================
-
+public record clsCrearReporteDTO(
+    int idProyecto,
+    string nombre,
+    string descripcion,
+    DateTime fecha,
+    string resumenAvance,
+    int tareasRetrasadas
+);
 public record LoginDTO(string nombre, string password);
 public record UsuarioRegistroDTO(string nombre, string email, string password, string rol);
 

@@ -18,7 +18,7 @@ BEGIN
 END;
 
 PROCEDURE recalcular_proyecto(p_id_proy PROYECTO.ID_PROYECTO%TYPE) IS
-    v_total      NUMBER := 0;
+    v_total     NUMBER := 0;
     v_terminadas NUMBER := 0;
     v_porcentaje  NUMBER(5,2) := 0;
 BEGIN
@@ -29,7 +29,7 @@ BEGIN
     FROM TAREA T
     JOIN ESTADO E ON E.ID_ESTADO = T.ID_ESTADO
     WHERE T.ID_PROYECTO = p_id_proy
-    AND UPPER(E.NOMBRE) = 'FINISHED'; -- Ajustado a tu valor de inserción
+    AND UPPER(E.NOMBRE) = 'FINISHED'; 
 
     IF v_total > 0 THEN
         v_porcentaje := ROUND((v_terminadas / v_total) * 100, 2);
@@ -49,13 +49,20 @@ END;
 
 AFTER EACH ROW IS
 BEGIN
-IF INSERTING OR UPDATING THEN agregar_proyecto(:NEW.ID_PROYECTO); END IF;
-IF DELETING OR UPDATING THEN agregar_proyecto(:OLD.ID_PROYECTO); END IF;
+    IF INSERTING OR UPDATING THEN agregar_proyecto(:NEW.ID_PROYECTO); END IF;
+    IF DELETING OR UPDATING THEN agregar_proyecto(:OLD.ID_PROYECTO); END IF;
 END AFTER EACH ROW;
 
 AFTER STATEMENT IS
 BEGIN
-FOR i IN 1 .. g_count LOOP recalcular_proyecto(g_ids(i)); END LOOP;
+    -- Ejecutamos el recalculo
+    FOR i IN 1 .. g_count LOOP 
+        recalcular_proyecto(g_ids(i)); 
+    END LOOP;
+    
+    -- 🌟 COMPLETAMENTE VITAL: Limpiamos la memoria interna para la próxima ejecución
+    g_count := 0;
+    g_ids.DELETE;
 END AFTER STATEMENT;
 
 END;

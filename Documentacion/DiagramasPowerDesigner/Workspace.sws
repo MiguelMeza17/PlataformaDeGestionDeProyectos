@@ -4,10 +4,10 @@
 
 <Workspace>
 	<Local Expanded="Yes">
-		<Model Expanded="Yes" ID="{E7DD65DB-503F-49A9-99D2-B6A2FE663E74}" Name="ModeloConceptualBD" Type="{1E597170-9350-11D1-AB3C-0020AF71E433}" URL="ModeloConceptual.cdm"/>
-		<Model Expanded="Yes" ID="{E7DD65DB-503F-49A9-99D2-B6A2FE663E74}" Name="PlataformaDeGestiondeProyectosLabBD" Type="{1E597170-9350-11D1-AB3C-0020AF71E433}" URL="ModeloConceptualLabBD.cdm"/>
+		<Model ID="{E7DD65DB-503F-49A9-99D2-B6A2FE663E74}" Name="ModeloConceptualBD" Type="{1E597170-9350-11D1-AB3C-0020AF71E433}" URL="ModeloConceptual.cdm"/>
+		<Model ID="{E7DD65DB-503F-49A9-99D2-B6A2FE663E74}" Name="PlataformaDeGestiondeProyectosLabBD" Type="{1E597170-9350-11D1-AB3C-0020AF71E433}" URL="ModeloConceptualLabBD.cdm"/>
 		<Model Expanded="Yes" ID="{7324F35A-ABA7-4D71-BA47-AB90DAED05F0}" Name="DiagramaDeClasesSoftware" Type="{18112060-1A4B-11D1-83D9-444553540000}" URL="DiagramaDeClasesSoftware.oob"/>
-		<Model ID="{ACD110BE-36AD-477C-9F46-404664665259}" Name="ModeloFisicoBD" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="ModeloFisicoBD.pdm"/>
+		<Model Expanded="Yes" ID="{ACD110BE-36AD-477C-9F46-404664665259}" Name="ModeloFisicoBD" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="ModeloFisicoBD.pdm"/>
 	</Local>
 	<BrowserModule Name="Repository"/>
 </Workspace>

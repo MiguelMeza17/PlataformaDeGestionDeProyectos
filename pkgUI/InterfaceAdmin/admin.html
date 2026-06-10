@@ -53,23 +53,31 @@
             </form>
         </section>
 
-        <section class="card stats-section" style="grid-column: span 2;">
-            <h2>📊 Estado General de Proyectos (Oracle)</h2>
-            <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap;">
-                <div class="progress-circle">
-                    <span id="percentageText">0%</span>
+        <section class="card" style="grid-column: span 2;">
+            <h2>⚡ Módulo de Procesos de Negocio (Oracle PL/SQL)</h2>
+            <p style="color: #a0aec0; font-size: 0.9rem; margin-bottom: 20px;">
+                Visualiza, edita y elimina registros procesados directamente en el servidor de Base de Datos.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(45%, 1fr)); gap: 20px; width: 100%;">
+                
+                <div style="background: var(--input-bg); padding: 15px; border-radius: 8px; display: flex; flex-direction: column;">
+                    <button type="button" id="btnListarProyectos" class="btn-primary" style="margin-top: 0; padding: 10px;">🏃‍♂️ Listar Proyectos</button>
+                    <div id="consolaListar" style="margin-top: 15px; padding: 10px; background: #050a12; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #4da6ff; min-height: 200px; white-space: pre-wrap; overflow-y: auto; max-height: 350px; border: 1px solid rgba(77, 166, 255, 0.2); display: flex; flex-direction: column; gap: 10px;">
+                        Esperando orden...
+                    </div>
                 </div>
-                <div class="chart-container" style="position: relative; height:200px; width:250px">
-                    <canvas id="taskChart"></canvas>
+
+                <div style="background: var(--input-bg); padding: 15px; border-radius: 8px; display: flex; flex-direction: column;">
+                    <button type="button" id="btnListarReportes" class="btn-primary" style="margin-top: 0; padding: 10px; background-color: #e67e22;">📋 Listar Reportes Oficiales</button>
+                    <div id="consolaReportes" style="margin-top: 15px; padding: 10px; background: #050a12; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #ffb366; min-height: 200px; white-space: pre-wrap; overflow-y: auto; max-height: 350px; border: 1px solid rgba(230, 126, 34, 0.2); display: flex; flex-direction: column; gap: 10px;">
+                        Esperando orden...
+                    </div>
                 </div>
+
             </div>
         </section>
-
-        <section class="card" style="grid-column: span 2;">
-            <h2>📁 Proyectos Existentes en la Base de Datos</h2>
-            <div id="listaProyectos" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 15px;">
-                </div>
-        </section>
+      
 
     </div>
 

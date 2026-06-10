@@ -80,17 +80,32 @@ namespace GestionDeProyectos.pkgUI
             if (varObj != null) 
                 return false;
 
-            bool vrmDbSuccess = clsProjectData.opInsertarProyecto(
-        prmName, prmDescription, prmStartingDate, prmEndingDate, prmGeneralState, prmAdvancePercentage
+            int nuevoId =
+    clsProjectData.opInsertarProyecto(
+        prmName,
+        prmDescription,
+        prmStartingDate,
+        prmEndingDate,
+        prmGeneralState,
+        prmAdvancePercentage
     );
 
-        if (!vrmDbSuccess) return false;
+if (nuevoId == 0)
+    return false;
+clsProject nuevoProyecto =
+    new clsProject(
+        nuevoId,
+        prmName,
+        prmDescription,
+        prmStartingDate,
+        prmEndingDate,
+        prmGeneralState,
+        prmAdvancePercentage
+    );
 
+attProjects.Add(nuevoProyecto);
 
-        clsProject newProject = new clsProject(
-            prmOUID, prmName, prmDescription, prmStartingDate, prmEndingDate, prmGeneralState, prmAdvancePercentage
-        );
-                return opAssociateProject(newProject);
+return true;
         }
 
     public bool opRegisterStakeholder(
@@ -190,11 +205,14 @@ namespace GestionDeProyectos.pkgUI
             string prmProgressSummary,
             int prmRetardedTasks)
         {
+            Console.WriteLine("Proyecto recibido: " + prmProjectOUID);
             clsProject varProject = opGetProject(prmProjectOUID,null);
 
-            if (varProject == null)
+            if (varProject == null){
+                Console.WriteLine("Proyecto NO encontrado");
                 return false;
-
+            }
+            Console.WriteLine("Proyecto encontrado: " + varProject.Name);
             return varProject.opRegisterReport(
                 prmOUID,
                 prmName,
@@ -300,7 +318,7 @@ namespace GestionDeProyectos.pkgUI
                 prmRetardedTasks
             );
         }
-        public bool opDeleteProject(int prmOUID)
+    public bool opDeleteProject(int prmOUID)
     {
     clsProject varObj = opGetProject(prmOUID, null);
     if (varObj == null) return false;
@@ -383,6 +401,7 @@ namespace GestionDeProyectos.pkgUI
                return clsBrockerCrud.opGetItemByEmail(prmEmail, attStakeholders); 
 
         }
+        
 
         public clsTask opGetTask(int prmOUID , string prmName)
         {
@@ -391,5 +410,95 @@ namespace GestionDeProyectos.pkgUI
             else
                 return clsBrockerCrud.opGetItemByName(prmName, attTasks);
         }
+        // =========================================================================
+// MÉTODOS PARA EJECUTAR PROCESOS DE NEGOCIO ANALÍTICOS (PL/SQL VIA DBMS_OUTPUT)
+// =========================================================================
+
+public List<string> opGetReporteListarProyectos()
+{
+    return EjecutarBloqueConDbmsOutput("BEGIN PKG_PROYECTO.LISTAR_PROYECTOS; END;");
+}
+
+public List<string> opGetReporteConteoReportes()
+{
+    return EjecutarBloqueConDbmsOutput("BEGIN PKG_PROYECTO.CONTAR_REPORTES_POR_PROYECTO; END;");
+}
+
+public List<string> opGetReportePromedioAvance()
+{
+    return EjecutarBloqueConDbmsOutput("BEGIN PKG_PROYECTO.LISTAR_PROMEDIO_AVANCE_POR_ESTADO; END;");
+}
+
+// =========================================================================
+// MÉTODO INTERNO PARA LEER EL BÚFER DE TEXTO DE ORACLE
+// =========================================================================
+private List<string> EjecutarBloqueConDbmsOutput(string bloqueAnonimo)
+{
+    var lineas = new List<string>();
+
+    // Usamos el método nativo de tu proyecto para obtener la conexión abierta
+    using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
+    {
+        try
+        {
+            vrmConn.Open();
+
+            // 1. Habilitar el búfer de salida de texto en la sesión de Oracle
+            using (OracleCommand cmdEnable = new OracleCommand("BEGIN DBMS_OUTPUT.ENABLE(NULL); END;", vrmConn))
+            {
+                cmdEnable.ExecuteNonQuery();
+            }
+
+            // 2. Ejecutar la lógica de negocio del paquete (los PUT_LINE)
+            using (OracleCommand cmdExec = new OracleCommand(bloqueAnonimo, vrmConn))
+            {
+                cmdExec.ExecuteNonQuery();
+            }
+
+            // 3. Bloque anónimo auxiliar para extraer de golpe las líneas del búfer usando un delimitador
+            string scriptGetLines = @"
+                DECLARE
+                    l_line VARCHAR2(255);
+                    l_status INTEGER;
+                BEGIN
+                    LOOP
+                        DBMS_OUTPUT.GET_LINE(l_line, l_status);
+                        EXIT WHEN l_status <> 0;
+                        :lineasOut := :lineasOut || l_line || '~';
+                    END LOOP;
+                END;";
+
+            using (OracleCommand cmdGetLines = new OracleCommand(scriptGetLines, vrmConn))
+            {
+                OracleParameter paramOut = new OracleParameter("lineasOut", OracleDbType.Varchar2, 32767)
+                {
+                    Direction = ParameterDirection.Output,
+                    Value = ""
+                };
+                cmdGetLines.Parameters.Add(paramOut);
+                cmdGetLines.ExecuteNonQuery();
+
+                string resultadoRaw = paramOut.Value?.ToString() ?? "";
+                if (!string.IsNullOrEmpty(resultadoRaw) && resultadoRaw != "null")
+                {
+                    // Separamos las líneas usando nuestro separador '~'
+                    lineas = new List<string>(resultadoRaw.Split('~', StringSplitOptions.RemoveEmptyEntries));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            lineas.Add("❌ Error en la base de datos Oracle: " + ex.Message);
+        }
+    }
+
+    if (lineas.Count == 0)
+    {
+        lineas.Add("ℹ️ El procedimiento se ejecutó correctamente pero no generó salidas de texto.");
+    }
+
+    return lineas;
+}
+        
     }
 }

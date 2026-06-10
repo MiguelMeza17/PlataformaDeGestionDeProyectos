@@ -93,26 +93,78 @@ END PKG_ESTADO;
 /*==============================================================*/
 
 CREATE OR REPLACE PACKAGE PKG_PROYECTO AS
-    PROCEDURE INSERTAR(p_nom IN VARCHAR2, p_desc IN VARCHAR2, p_fi IN DATE, p_ff IN DATE, p_eg IN VARCHAR2, p_av IN NUMBER);
-    PROCEDURE ACTUALIZAR(p_id IN NUMBER, p_nom IN VARCHAR2, p_desc IN VARCHAR2, p_fi IN DATE, p_ff IN DATE, p_eg IN VARCHAR2, p_av IN NUMBER);
+
+    PROCEDURE INSERTAR(
+        p_nom IN VARCHAR2,
+        p_desc IN VARCHAR2,
+        p_fi IN DATE,
+        p_ff IN DATE,
+        p_eg IN VARCHAR2,
+        p_av IN NUMBER,
+        p_id OUT NUMBER
+    );
+
+    PROCEDURE ACTUALIZAR(
+        p_id IN NUMBER,
+        p_nom IN VARCHAR2,
+        p_desc IN VARCHAR2,
+        p_fi IN DATE,
+        p_ff IN DATE,
+        p_eg IN VARCHAR2,
+        p_av IN NUMBER
+    );
+
     PROCEDURE ELIMINAR(p_id IN NUMBER);
-    FUNCTION CONSULTAR(p_id IN NUMBER) RETURN VARCHAR2;
+
+    FUNCTION CONSULTAR(p_id IN NUMBER)
+    RETURN VARCHAR2;
+
     PROCEDURE LISTAR_PROYECTOS;
     PROCEDURE LISTAR_AVANCE_PROYECTOS;
     PROCEDURE LISTAR_PROYECTOS_POR_PALABRA(p_keyword IN VARCHAR2);
     PROCEDURE CONTAR_REPORTES_POR_PROYECTO;
     PROCEDURE LISTAR_PROMEDIO_AVANCE_POR_ESTADO;
     PROCEDURE LISTAR_PROYECTOS_SIN_REPORTES;
+
 END PKG_PROYECTO;
 /
 
 CREATE OR REPLACE PACKAGE BODY PKG_PROYECTO AS
-    PROCEDURE INSERTAR(p_nom IN VARCHAR2, p_desc IN VARCHAR2, p_fi IN DATE, p_ff IN DATE, p_eg IN VARCHAR2, p_av IN NUMBER) IS
-    BEGIN
-        INSERT INTO PROYECTO (NOMBRE, DESCRIPCION, FECHA_INICIO, FECHA_FINALIZACION, ESTADO_GENERAL, PORCENTAJE_DE_AVANCE) 
-        VALUES (p_nom, p_desc, p_fi, p_ff, p_eg, p_av);
-        COMMIT;
-    END INSERTAR;
+    PROCEDURE INSERTAR(
+    p_nom IN VARCHAR2,
+    p_desc IN VARCHAR2,
+    p_fi IN DATE,
+    p_ff IN DATE,
+    p_eg IN VARCHAR2,
+    p_av IN NUMBER,
+    p_id OUT NUMBER
+)
+IS
+BEGIN
+
+    INSERT INTO PROYECTO
+    (
+        NOMBRE,
+        DESCRIPCION,
+        FECHA_INICIO,
+        FECHA_FINALIZACION,
+        ESTADO_GENERAL,
+        PORCENTAJE_DE_AVANCE
+    )
+    VALUES
+    (
+        p_nom,
+        p_desc,
+        p_fi,
+        p_ff,
+        p_eg,
+        p_av
+    )
+    RETURNING ID_PROYECTO INTO p_id;
+
+    COMMIT;
+
+END INSERTAR;
 
     PROCEDURE ACTUALIZAR(p_id IN NUMBER, p_nom IN VARCHAR2, p_desc IN VARCHAR2, p_fi IN DATE, p_ff IN DATE, p_eg IN VARCHAR2, p_av IN NUMBER) IS
     BEGIN
@@ -442,7 +494,175 @@ CREATE OR REPLACE PACKAGE BODY PKG_REPORTES AS
 
 END PKG_REPORTES;
 /
+--Regla de Negocio "Al crear una tarea, debe actualizarse automáticamente el avance del proyecto"
+CREATE OR REPLACE PROCEDURE SP_CREAR_TAREA_TRANSACCION
+(
+    p_nom IN VARCHAR2,
+    p_desc IN VARCHAR2,
+    p_fi IN DATE,
+    p_fl IN DATE,
+    p_ide IN NUMBER,
+    p_idp IN NUMBER,
+    p_idua IN NUMBER,
+    p_idud IN NUMBER
+)
+IS
+BEGIN
 
+    -- 1. INSERTAR TAREA
+    INSERT INTO TAREA
+    (
+        NOMBRE,
+        DESCRIPCION,
+        FECHA_INICIO,
+        FECHA_LIMITE,
+        ID_ESTADO,
+        ID_PROYECTO,
+        ID_USUARIO_ASIGNA,
+        ID_USUARIO_DESARROLLA
+    )
+    VALUES
+    (
+        p_nom,
+        p_desc,
+        p_fi,
+        p_fl,
+        p_ide,
+        p_idp,
+        p_idua,
+        p_idud
+    );
+
+    -- 2. ACTUALIZAR AVANCE
+    UPDATE PROYECTO
+    SET PORCENTAJE_DE_AVANCE =
+        PORCENTAJE_DE_AVANCE + 5
+    WHERE ID_PROYECTO = p_idp;
+
+    -- 3. CONFIRMAR
+    COMMIT;
+
+EXCEPTION
+
+    WHEN OTHERS THEN
+
+        ROLLBACK;
+
+        DBMS_OUTPUT.PUT_LINE
+        (
+            'ERROR EN LA TRANSACCION: '
+            || SQLERRM
+        );
+
+END;
+/
+--Regla de negocio "Al eliminar un proyecto deben eliminarse sus tareas y reportes"
+CREATE OR REPLACE PROCEDURE SP_ELIMINAR_PROYECTO_COMPLETO
+(
+    p_id_proyecto IN NUMBER
+)
+IS
+BEGIN
+
+    -- 1. ELIMINAR REPORTES
+    DELETE FROM REPORTES
+    WHERE ID_PROYECTO = p_id_proyecto;
+
+    -- 2. ELIMINAR TAREAS
+    DELETE FROM TAREA
+    WHERE ID_PROYECTO = p_id_proyecto;
+
+    -- 3. ELIMINAR PROYECTO
+    DELETE FROM PROYECTO
+    WHERE ID_PROYECTO = p_id_proyecto;
+
+    -- 4. CONFIRMAR
+    COMMIT;
+
+EXCEPTION
+
+    WHEN OTHERS THEN
+
+        ROLLBACK;
+
+        DBMS_OUTPUT.PUT_LINE
+        (
+            'ERROR ELIMINANDO PROYECTO: '
+            || SQLERRM
+        );
+
+END;
+/
+--Regla de negocio "Cuando una tarea se finaliza, debe actualizarse el estado y el avance del proyecto"
+CREATE OR REPLACE PROCEDURE SP_ACTUALIZAR_ESTADO_TAREA
+(
+    p_id_tarea   IN NUMBER,
+    p_estado     IN NUMBER,
+    p_id_proyecto IN NUMBER
+)
+IS
+
+    v_total        NUMBER;
+    v_terminadas   NUMBER;
+    v_progreso     NUMBER;
+    v_avance       NUMBER;
+
+BEGIN
+
+    -- 1. ACTUALIZAR TAREA
+    UPDATE TAREA
+    SET ID_ESTADO = p_estado
+    WHERE ID_TAREA = p_id_tarea;
+
+    -- 2. TOTAL TAREAS
+    SELECT COUNT(*)
+    INTO v_total
+    FROM TAREA
+    WHERE ID_PROYECTO = p_id_proyecto;
+
+    -- 3. TERMINADAS
+    SELECT COUNT(*)
+    INTO v_terminadas
+    FROM TAREA
+    WHERE ID_PROYECTO = p_id_proyecto
+    AND ID_ESTADO = 3;
+
+    -- 4. EN PROGRESO
+    SELECT COUNT(*)
+    INTO v_progreso
+    FROM TAREA
+    WHERE ID_PROYECTO = p_id_proyecto
+    AND ID_ESTADO = 2;
+
+    -- 5. CALCULAR AVANCE
+    v_avance :=
+    (
+        (v_terminadas * 100)
+        +
+        (v_progreso * 50)
+    ) / v_total;
+
+    -- 6. ACTUALIZAR PROYECTO
+    UPDATE PROYECTO
+    SET PORCENTAJE_DE_AVANCE = v_avance
+    WHERE ID_PROYECTO = p_id_proyecto;
+
+    -- 7. COMMIT
+    COMMIT;
+
+EXCEPTION
+
+    WHEN OTHERS THEN
+
+        ROLLBACK;
+
+        DBMS_OUTPUT.PUT_LINE
+        (
+            'ERROR: ' || SQLERRM
+        );
+
+END;
+/
 /*==============================================================*/
 /* CONSULTA TABLAS                                              */
 /*==============================================================*/
