@@ -9,12 +9,12 @@ body {
     justify-content: center;
     align-items: center;
     font-family: 'Poppins', sans-serif;
-    background-color: #050a12; /* Fondo casi negro, muy profundo */
+    background-color: #050a12;
 }
 
 .main-title {
     font-family: 'Orbitron', sans-serif;
-    color: #4da6ff; /* Azul eléctrico brillante */
+    color: #4da6ff; 
     text-shadow: 0 0 15px rgba(77, 166, 255, 0.6);
     margin-bottom: 25px;
     font-size: 1.8rem;
@@ -24,7 +24,7 @@ body {
 }
 
 .container {
-    background: #0b1521; /* Azul muy oscuro para el contenedor */
+    background: #0b1521;
     padding: 2.5rem;
     border-radius: 20px;
     border: 1px solid rgba(77, 166, 255, 0.3);
@@ -60,7 +60,7 @@ input, select {
     width: 100%;
     padding: 14px;
     margin: 10px 0;
-    background-color: #121e2a; /* Azul un poco más claro para el input */
+    background-color: #121e2a;
     color: #ffffff;
     border: 1px solid rgba(77, 166, 255, 0.3);
     border-radius: 12px;
@@ -86,7 +86,7 @@ input:focus, select:focus {
     font-weight: bold;
     font-size: 1.1rem;
     font-family: 'Orbitron', sans-serif;
-    background: #4da6ff; /* Azul eléctrico vibrante */
+    background: #4da6ff;
     color: #050a12;
     margin-top: 1.5rem;
     transition: 0.3s;

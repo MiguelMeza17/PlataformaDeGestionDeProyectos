@@ -8,7 +8,6 @@ namespace GestionDeProyectos.pkgData
 {
     public class clsProjectData
     {
-        // Se cambió el primer parámetro de string a int en el Action
         public static void opLoadProjects
         (
             Action<int, string, string, DateTime, DateTime, string, float> prmRegisterAction
@@ -29,7 +28,6 @@ namespace GestionDeProyectos.pkgData
                         {
                             while (vrmReader.Read())
                             {
-                                // Corrección: Convertir a int usando Convert.ToInt32
                                 int vrmIDProyecto = Convert.ToInt32(vrmReader["ID_PROYECTO"]);
 
                                 string vrmNombre = vrmReader["NOMBRE"]?.ToString() ?? string.Empty;
@@ -68,7 +66,6 @@ namespace GestionDeProyectos.pkgData
                 }
             }
         }
-        // 2. CREAR (CREATE): Llama a PKG_PROYECTO.INSERTAR
         public static bool opInsertarProyecto(string prmNom, string prmDesc, DateTime prmFi, DateTime prmFf, string prmEg, float prmAv)
         {
             string vrmProcedure = "PKG_PROYECTO.INSERTAR";
@@ -79,7 +76,7 @@ namespace GestionDeProyectos.pkgData
                 {
                     vrmCmd.CommandType = CommandType.StoredProcedure;
 
-                    // Mapeo de parámetros con los nombres exactos de tu paquete en Oracle
+
                     vrmCmd.Parameters.Add(new OracleParameter("p_nom", OracleDbType.Varchar2)).Value = prmNom;
                     vrmCmd.Parameters.Add(new OracleParameter("p_desc", OracleDbType.Varchar2)).Value = prmDesc;
                     vrmCmd.Parameters.Add(new OracleParameter("p_fi", OracleDbType.Date)).Value = prmFi;
@@ -90,8 +87,8 @@ namespace GestionDeProyectos.pkgData
                     try
                     {
                         vrmConn.Open();
-                        vrmCmd.ExecuteNonQuery(); // Ejecuta el procedimiento almacenado
-                        return true; // Si no hay excepción, asumimos éxito debido al COMMIT del paquete
+                        vrmCmd.ExecuteNonQuery();
+                        return true;
                     }
                     catch (Exception ex)
                     {
@@ -102,7 +99,6 @@ namespace GestionDeProyectos.pkgData
             }
         }
 
-        // 3. ACTUALIZAR (UPDATE): Llama a PKG_PROYECTO.ACTUALIZAR
         public static bool opActualizarProyecto(int prmId, string prmNom, string prmDesc, DateTime prmFi, DateTime prmFf, string prmEg, float prmAv)
         {
             string vrmProcedure = "PKG_PROYECTO.ACTUALIZAR";
@@ -136,7 +132,6 @@ namespace GestionDeProyectos.pkgData
             }
         }
 
-        // 4. ELIMINAR (DELETE): Llama a PKG_PROYECTO.ELIMINAR
         public static bool opEliminarProyecto(int prmId)
         {
             string vrmProcedure = "PKG_PROYECTO.ELIMINAR";

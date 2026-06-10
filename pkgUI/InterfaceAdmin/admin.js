@@ -5,9 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const reportForm = document.getElementById('reportForm');
     const listaProyectosContainer = document.getElementById('listaProyectos');
 
-    // ==============================================================================
-    // 🌟 CONTROLADOR 1: CRUD DE PROYECTOS (CREAR / ACTUALIZAR)
-    // ==============================================================================
     projectForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -17,8 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const fechaInicio = document.getElementById('pStartDate').value;
         const fechaFinalizacion = document.getElementById('pEndDate').value;
         const estadoGeneral = document.getElementById('pState').value;
-        
-        // Si es edición pedimos el avance, si es nuevo arranca en 0
+
         const porcentajeAvance = idProyecto > 0 ? parseFloat(prompt("Porcentaje de avance actual (0-100):") || 0) : 0;
 
         const esEdicion = idProyecto > 0;
@@ -51,9 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ==============================================================================
-    // 🌟 CONTROLADOR 2: ENVIAR REPORTE OFICIAL
-    // ==============================================================================
     reportForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -87,9 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ==============================================================================
-    // 🌟 CONTROLADOR 3: LISTAR PROYECTOS Y ACTUALIZAR GRÁFICA DESDE ORACLE
-    // ==============================================================================
     async function cargarProyectosYGrafica() {
         try {
             const res = await fetch(`${URL_BASE}/proyectos/listar`);
@@ -120,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // 2. Calcular datos de la gráfica dinámicamente
+
             let sinIniciar = 0, enProceso = 0, terminados = 0;
             proyectos.forEach(p => {
                 const est = (p.attGeneralState || p.estadoGeneral || "").toLowerCase();
@@ -134,13 +124,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const total = proyectos.length || 1;
             const porcentajeGral = Math.round((terminados / total) * 100);
 
-            // Actualizar interfaz visual de los indicadores
             const circle = document.querySelector('.progress-circle');
             if (circle) circle.style.setProperty('--progress', porcentajeGral + '%');
             const txt = document.getElementById('percentageText');
             if (txt) txt.innerText = porcentajeGral + '%';
 
-            // Dibujar Dona de Chart.js
             const ctx = document.getElementById('taskChart').getContext('2d');
             if (window.chartProyectos) window.chartProyectos.destroy();
 
@@ -161,9 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ==============================================================================
-    // 🌟 ACCIONES COMPLEMENTARIAS (ELIMINAR Y EDITAR)
-    // ==============================================================================
     window.opEliminarProyecto = async function(id) {
         if (!confirm("🚨 ¿Desea eliminar este proyecto de Oracle permanentemente?")) return;
         try {
@@ -188,6 +173,5 @@ document.addEventListener('DOMContentLoaded', () => {
         projectForm.scrollIntoView({ behavior: 'smooth' });
     };
 
-    // Inicialización al abrir la página
     cargarProyectosYGrafica();
 });

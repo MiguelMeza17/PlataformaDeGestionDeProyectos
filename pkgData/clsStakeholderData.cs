@@ -74,8 +74,7 @@ namespace GestionDeProyectos.pkgData
 
                     using (OracleCommand vrmCmd = new OracleCommand(sql, vrmConn))
                     {
-                        // CORRECCIÓN CRÍTICA: Fuerza a Oracle a leer los parámetros por su nombre (:name, :rol, etc.)
-                        // Evita que el parámetro de salida desordene el mapeo posicional de las variables.
+
                         vrmCmd.BindByName = true;
 
                         vrmCmd.Parameters.Add("name", OracleDbType.Varchar2).Value = prmName;

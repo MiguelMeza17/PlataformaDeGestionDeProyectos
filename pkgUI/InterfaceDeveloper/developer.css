@@ -1,10 +1,9 @@
 :root {
-    /* Paleta azul neón y oscuro */
+
     --fondo-azul-oscuro: #050a12;
     --columna-azul: #0b1521;
     --tarjeta-azul: #121e2a;
     
-    /* Colores brillantes de acento */
     --por-hacer: #a5d8ff;
     --en-desarrollo: #4da6ff;
     --terminada: #74c0fc;
@@ -68,7 +67,6 @@ h1 {
     border-color: #ffffff !important;
 }
 
-/* Bordes brillantes para las tarjetas */
 .todo { border-left-color: var(--por-hacer); }
 .doing { border-left-color: var(--en-desarrollo); }
 .done { border-left-color: var(--terminada); }

@@ -77,8 +77,7 @@ namespace GestionDeProyectos.pkgData
 
                     using (OracleCommand vrmCmd = new OracleCommand(sql, vrmConn))
                     {
-                        // Esta línea obliga a Oracle a usar los nombres ':idEstado' e ':idTarea'
-                        // solucionando el problema de orden posicional por defecto
+
                         vrmCmd.BindByName = true;
 
                         vrmCmd.Parameters.Add("idEstado", OracleDbType.Int32).Value = prmNewState;
