@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
         formulario.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // CORRECCIÓN CRÍTICA: Recuperar el ID real del usuario que inició sesión
             const idAsignaPersistente = localStorage.getItem("idUsuario") 
                 ? parseInt(localStorage.getItem("idUsuario")) 
                 : usuarioActualId;
@@ -62,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 fechaInicio: new Date(document.getElementById('fechaInicio').value).toISOString(),
                 fechaLimite: new Date(document.getElementById('fechaLimite').value).toISOString(),
                 idProyecto: parseInt(document.getElementById('idProyecto').value),
-                idUsuarioAsigna: idAsignaPersistente, // 🚀 ID dinámico enviado a Oracle
+                idUsuarioAsigna: idAsignaPersistente,
                 idUsuarioDesarrolla: parseInt(document.getElementById('idUsuarioDesarrolla').value),
                 estado: "InDevelopment"
             };
@@ -109,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         return;
                     }
 
-                    // Se cargan temporalmente los datos del usuario que se va a editar
                     usuarioActualId = usuario.id;
                     usuarioActualEmail = usuario.email;
                     usuarioActualPassword = usuario.password || "";
@@ -174,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     selectRol.disabled = true;
                     btnGuardar.disabled = true;
                     
-                    // Restauramos el id del usuario logueado en la sesión activa
+
                     usuarioActualId = localStorage.getItem("idUsuario") ? parseInt(localStorage.getItem("idUsuario")) : null;
                     usuarioActualEmail = null;
                     usuarioActualPassword = null;

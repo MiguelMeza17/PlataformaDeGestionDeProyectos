@@ -8,7 +8,6 @@ namespace GestionDeProyectos.pkgData
 {
     public class clsProjectData
     {
-        // Se cambió el primer parámetro de string a int en el Action
         public static void opLoadProjects
         (
             Action<int, string, string, DateTime, DateTime, string, float> prmRegisterAction
