@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const nombreUsuario = usuario.nombre || "Usuario";
                     
                     localStorage.setItem("nombreUsuario", nombreUsuario);
+                    localStorage.setItem("idUsuario", usuario.id); 
 
                     const rolId = usuario.rolId;
 

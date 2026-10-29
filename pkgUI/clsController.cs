@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using GestionDeProyectos.pkgDomain;
 using GestionDeProyectos.pkgSystem;
 using GestionDeProyectos.pkgData;
-using Oracle.ManagedDataAccess.Client;
-using System.Data;
+using System.Linq;
 
 #nullable disable
 
@@ -15,37 +14,77 @@ namespace GestionDeProyectos.pkgUI
         private static clsController attInstance = null!;
         private List<clsStakeholder> attStakeholders = new List<clsStakeholder>();
         private List<clsProject> attProjects = new List<clsProject>();
-        private List<clsTask> attTasks = new List<clsTask>();
+        private List<clsTask> attTasksProject = new List<clsTask>();
+
         public List<clsProject> opListAllProjects()
         {
-        return attProjects;
+            return attProjects;
         }
-    private clsController()
-    {
 
-        attStakeholders.Clear();
-
-        clsStakeholderData.opLoadStakeholders((id, name, desc, email, pass, rolStr) =>
+        public List<clsTask> opListTasksByDeveloper(int prmOUDID)
         {
-            clsRoles rolEnum = clsRoles.Developer;
+            clsStakeholder varObj = opGetStakeholder(prmOUDID, null);
+            if (varObj == null) return null;
+            
+            return varObj.opListTasksByDeveloper();
+        }
 
-            if (rolStr == "0")
-                rolEnum = clsRoles.Admin;
-            else if (rolStr == "1")
-                rolEnum = clsRoles.Manager;
-            else if (rolStr == "2")
-                rolEnum = clsRoles.Developer;
+        public List<clsStakeholder> opListDevelopers()
+        {
+            List<clsStakeholder> vrmDevelopers = new List<clsStakeholder>();
+            foreach (clsStakeholder varObj in attStakeholders)
+            {
+                if (varObj.opGetRol() == clsRoles.Developer)
+                {
+                    vrmDevelopers.Add(varObj);
+                }
+            }
+            return vrmDevelopers;
+        }
 
-            clsStakeholder varObj = new clsStakeholder(id, name, desc, email, pass, rolEnum);
-            attStakeholders.Add(varObj);
-        });
-        attProjects.Clear();
-    clsProjectData.opLoadProjects((id, name, desc, start, end, state, advance) =>
-    {
-        clsProject varProj = new clsProject(id, name, desc, start, end, state, advance);
-        attProjects.Add(varProj);
-    });
-    }
+        private clsController()
+        {
+            attStakeholders.Clear();
+
+            clsStakeholderData.opLoadStakeholders((id, name, desc, email, pass, rolStr) =>
+            {
+                clsRoles rolEnum = clsRoles.Developer;
+
+                if (rolStr == "0")
+                    rolEnum = clsRoles.Admin;
+                else if (rolStr == "1")
+                    rolEnum = clsRoles.Manager;
+                else if (rolStr == "2")
+                    rolEnum = clsRoles.Developer;
+
+                clsStakeholder varObj = new clsStakeholder(id, name, desc, email, pass, rolEnum);
+                attStakeholders.Add(varObj);
+            });
+
+            attProjects.Clear();
+            
+            clsProjectData.opLoadProjects((id, name, desc, start, end, state, advance) =>
+            {
+                clsProject varProj = new clsProject(id, name, desc, start, end, state, advance);
+                attProjects.Add(varProj);
+            });
+
+            attTasksProject.Clear();
+
+            clsTaskData.opLoadTasks((id, name, desc, start, limit, stateNum, idProj, idAsigna, idDesarrolla) =>
+            {
+                clsState estadoEnum = (clsState)stateNum;
+                clsTask varTask = new clsTask(id, name, desc, start, limit, estadoEnum);
+                
+                attTasksProject.Add(varTask);
+                
+                clsStakeholder dev = attStakeholders.FirstOrDefault(s => s.opGetOUID() == idDesarrolla);
+                if (dev != null)
+                {
+                    dev.opAddTask(varTask);
+                }
+            });
+        }
 
         public static clsController opGetInstance()
         {
@@ -75,103 +114,52 @@ namespace GestionDeProyectos.pkgUI
             string prmGeneralState,
             float prmAdvancePercentage)
         {
-            clsProject varObj = opGetProject(0,prmName);
+            clsProject varObj = opGetProject(0, prmName);
 
             if (varObj != null) 
                 return false;
 
-            int nuevoId =
-    clsProjectData.opInsertarProyecto(
-        prmName,
-        prmDescription,
-        prmStartingDate,
-        prmEndingDate,
-        prmGeneralState,
-        prmAdvancePercentage
-    );
+            int vrmNewId = clsProjectData.opInsertarProyecto(
+                                        prmName, prmDescription,
+                                        prmStartingDate, prmEndingDate,
+                                        prmGeneralState, prmAdvancePercentage
+                                    );
 
-if (nuevoId == 0)
-    return false;
-clsProject nuevoProyecto =
-    new clsProject(
-        nuevoId,
-        prmName,
-        prmDescription,
-        prmStartingDate,
-        prmEndingDate,
-        prmGeneralState,
-        prmAdvancePercentage
-    );
+            if (vrmNewId == 0) return false;
 
-attProjects.Add(nuevoProyecto);
+            clsProject newProject = new clsProject(
+                vrmNewId, prmName, prmDescription,
+                prmStartingDate, prmEndingDate,
+                prmGeneralState, prmAdvancePercentage
+            );
 
-return true;
+            return opAssociateProject(newProject);
         }
 
-    public bool opRegisterStakeholder(
-        string prmName,
-        string prmDescription,
-        string prmEmail,
-        string prmPassword,
-        clsRoles prmRol)
-    {
-        clsStakeholder varObj = opGetStakeholder(0, prmEmail);
-        if (varObj != null) return false;
-
-        using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
+        public bool opRegisterStakeholder(
+            string prmName,
+            string prmDescription,
+            string prmEmail,
+            string prmPassword,
+            clsRoles prmRol)
         {
-            try
-            {
-                vrmConn.Open();
+            clsStakeholder varObj = opGetStakeholder(0, prmEmail);
+            if (varObj != null) return false;
 
-                string sql = @"INSERT INTO USUARIO 
-                (NOMBRE, DESCRIPCION, CORREO, CONTRASENA, ID_ROL) 
-                VALUES (:name, :description, :email, :password, :rol) 
-                RETURNING ID_USUARIO INTO :prmId";
+            int vrmOUID = clsStakeholderData.opRegisterStakeholder(prmName, prmDescription, prmEmail, prmPassword, prmRol);
+            if (vrmOUID == -1) return false;
 
-                using (OracleCommand vrmCmd = new OracleCommand(sql, vrmConn))
-                {
-                    vrmCmd.Parameters.Add("name", OracleDbType.Varchar2).Value = prmName;
-                    vrmCmd.Parameters.Add("description", OracleDbType.Varchar2).Value = prmDescription;
-                    vrmCmd.Parameters.Add("email", OracleDbType.Varchar2).Value = prmEmail;
-                    vrmCmd.Parameters.Add("password", OracleDbType.Varchar2).Value = prmPassword;
-                    vrmCmd.Parameters.Add("rol", OracleDbType.Int32).Value = prmRol;
+            clsStakeholder newStakeholder = new clsStakeholder(
+                vrmOUID,
+                prmName,
+                prmDescription,
+                prmEmail,
+                prmPassword,
+                prmRol
+            );
 
-                    OracleParameter outParam = new OracleParameter("prmId", OracleDbType.Int32)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
-
-                    vrmCmd.Parameters.Add(outParam);
-
-                    if (vrmCmd.ExecuteNonQuery() > 0)
-                    {
-                        int prmOUID = Convert.ToInt32(outParam.Value.ToString());
-
-                        clsStakeholder newStakeholder = new clsStakeholder(
-                            prmOUID,
-                            prmName,
-                            prmDescription,
-                            prmEmail,
-                            prmPassword,
-                            prmRol
-                        );
-
-                        return opAssociateStakeholder(newStakeholder);
-                    }
-
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error en opRegisterStakeholder: " + ex.Message);
-                return false;
-            }
+            return opAssociateStakeholder(newStakeholder);
         }
-    }
-
-
 
         public bool opRegisterTask(
             int prmOUID,
@@ -179,23 +167,50 @@ return true;
             string prmDescription,
             DateTime prmFirstDate,
             DateTime prmLimitDate,
-            clsState prmState)
+            clsState prmState,
+            int prmIdProject,
+            int prmIdUserAssigns,
+            int prmIdUserDevelops)
         {
-            clsTask varObj = opGetTask(0,prmName);
+            clsTask varObj = opGetTask(0, prmName);
+            if (varObj != null) return false;
 
-            if (varObj != null)
-                return false;
+            int vrmFinalID = prmOUID;
+
+            if (vrmFinalID == 0)
+            {
+                vrmFinalID = clsTaskData.opRegisterTask(
+                    prmName, 
+                    prmDescription, 
+                    prmFirstDate, 
+                    prmLimitDate, 
+                    prmState, 
+                    prmIdProject, 
+                    prmIdUserAssigns, 
+                    prmIdUserDevelops
+                );
+            }
+            
+            if (vrmFinalID == -1) return false;
 
             clsTask newTask = new clsTask(
-                prmOUID,
+                vrmFinalID,
                 prmName,
                 prmDescription,
                 prmFirstDate,
                 prmLimitDate,
-                prmState);
+                prmState
+            );
+
+            clsStakeholder dev = attStakeholders.FirstOrDefault(s => s.opGetOUID() == prmIdUserDevelops);
+            if (dev != null)
+            {
+                dev.opAddTask(newTask);
+            }
 
             return opAssociateTask(newTask);
         }
+
         public bool opRegisterReport(
             int prmProjectOUID,
             int prmOUID,
@@ -206,7 +221,7 @@ return true;
             int prmRetardedTasks)
         {
             Console.WriteLine("Proyecto recibido: " + prmProjectOUID);
-            clsProject varProject = opGetProject(prmProjectOUID,null);
+            clsProject varProject = opGetProject(prmProjectOUID, null);
 
             if (varProject == null){
                 Console.WriteLine("Proyecto NO encontrado");
@@ -224,35 +239,34 @@ return true;
         }
 
         public bool opUpdateProject(
-        int prmOUID,
-        string prmName,
-        string prmDescription,
-        DateTime prmStartingDate,
-        DateTime prmEndingDate,
-        string prmGeneralState,
-        float prmAdvancePercentage)
+            int prmOUID,
+            string prmName,
+            string prmDescription,
+            DateTime prmStartingDate,
+            DateTime prmEndingDate,
+            string prmGeneralState,
+            float prmAdvancePercentage)
         {
-        clsProject varObj = opGetProject(prmOUID, null);
-        if (varObj == null)
-            return false;
+            clsProject varObj = opGetProject(prmOUID, null);
+            if (varObj == null)
+                return false;
 
-        // 🌟 PASO 1: Actualizar en Oracle llamando al Paquete
-        bool vrmDbSuccess = clsProjectData.opActualizarProyecto(
-            prmOUID, prmName, prmDescription, prmStartingDate, prmEndingDate, prmGeneralState, prmAdvancePercentage
-        );
+            bool vrmDbSuccess = clsProjectData.opActualizarProyecto(
+                prmOUID, prmName, prmDescription, prmStartingDate, prmEndingDate, prmGeneralState, prmAdvancePercentage
+            );
 
-        if (!vrmDbSuccess) return false;
+            if (!vrmDbSuccess) return false;
 
-        // 🌟 PASO 2: Modificar los datos en la memoria local
-        return varObj.opModify(
-            prmName,
-            prmDescription,
-            prmStartingDate,
-            prmEndingDate,
-            prmGeneralState,
-            prmAdvancePercentage
-    );
-}
+            return varObj.opModify(
+                prmName,
+                prmDescription,
+                prmStartingDate,
+                prmEndingDate,
+                prmGeneralState,
+                prmAdvancePercentage
+            );
+        }
+
         public bool opUpdateStakeholder(
             int prmOUID,
             string prmName,
@@ -261,10 +275,16 @@ return true;
             string prmPassword,
             clsRoles prmRol)
         {
-            clsStakeholder varObj = opGetStakeholder(prmOUID,null);
+            clsStakeholder varObj = opGetStakeholder(prmOUID, null);
 
             if (varObj == null)
                 return false;
+
+            bool vrmDbSuccess = clsStakeholderData.opActualizarStakeholder(
+                prmOUID, prmName, prmDescription, prmEmail, prmPassword, prmRol
+            );
+
+            if (!vrmDbSuccess) return false;
 
             return varObj.opModify(
                 prmName,
@@ -274,6 +294,7 @@ return true;
                 prmRol
             );
         }
+
         public bool opUpdateTask(
             int prmOUID,
             string prmName,
@@ -282,7 +303,7 @@ return true;
             DateTime prmLimitDate,
             clsState prmState)
         {
-            clsTask varObj = opGetTask(prmOUID,null);
+            clsTask varObj = opGetTask(prmOUID, null);
 
             if (varObj == null)
                 return false;
@@ -295,6 +316,7 @@ return true;
                 prmState
             );
         }
+
         public bool opUpdateReport(
             int prmProjectOUID,
             int prmOUID,
@@ -304,7 +326,7 @@ return true;
             string prmProgressSummary,
             int prmRetardedTasks)
         {
-            clsProject varProject = opGetProject(prmProjectOUID,null);
+            clsProject varProject = opGetProject(prmProjectOUID, null);
 
             if (varProject == null)
                 return false;
@@ -318,38 +340,45 @@ return true;
                 prmRetardedTasks
             );
         }
-    public bool opDeleteProject(int prmOUID)
-    {
-    clsProject varObj = opGetProject(prmOUID, null);
-    if (varObj == null) return false;
+        public static bool opActualizarEstadoTarea(int prmOUID, int prmNewState)
+        {
+            bool vrmDbSuccess = clsTaskData.opActualizarEstadoTarea(prmOUID, prmNewState);
+            if (!vrmDbSuccess)
+                Console.WriteLine($"[ADVERTENCIA]: La tarea con ID {prmOUID} NO EXISTE en la tabla TAREA.");
+            return vrmDbSuccess;
+        }
 
-    // 🌟 PASO 1: Eliminar en Oracle llamando al Paquete
-    bool vrmDbSuccess = clsProjectData.opEliminarProyecto(prmOUID);
-    if (!vrmDbSuccess) return false;
+        public bool opDeleteProject(int prmOUID)
+        {
+            clsProject varObj = opGetProject(prmOUID, null);
+            if (varObj == null) return false;
 
-    // 🌟 PASO 2: Remover de la memoria local
-    if (!varObj.opDie()) return false;
-    return opDisassociateProject(varObj);
-    }
+            bool vrmDbSuccess = clsProjectData.opEliminarProyecto(prmOUID);
+            if (!vrmDbSuccess) return false;
+
+            if (!varObj.opDie()) return false;
+            return opDisassociateProject(varObj);
+        }
+
         public bool opDeleteStakeholder(int prmOUID)
         {
-            clsStakeholder varObj = opGetStakeholder(prmOUID,null);
+            clsStakeholder varObj = opGetStakeholder(prmOUID, null);
             if(varObj == null) return false;
             if(!varObj.opDie()) return false;
             return opDisassociateStakeholder(varObj);
         }
+
         public bool opDeleteTask(int prmOUID)
         {
-            clsTask varObj = opGetTask(prmOUID,null);
+            clsTask varObj = opGetTask(prmOUID, null);
             if(varObj == null) return false;
             if(!varObj.opDie()) return false;
             return opDisassociateTask(varObj);
         }
-        public bool opDeleteReport(
-            int prmProjectOUID,
-            int prmOUID)
+
+        public bool opDeleteReport(int prmProjectOUID, int prmOUID)
         {
-            clsProject varObj = opGetProject(prmProjectOUID,null);
+            clsProject varObj = opGetProject(prmProjectOUID, null);
             if(varObj == null) return false;
             if(!varObj.opDie()) return false;
             return varObj.opDeleteReport(prmOUID);
@@ -362,13 +391,12 @@ return true;
 
         private bool opAssociateStakeholder(clsStakeholder prmObj)
         {
-            
             return clsBrockerCrud.opAssociateItemTo(prmObj, attStakeholders);
         }
 
         private bool opAssociateTask(clsTask prmObj)
         {
-            return clsBrockerCrud.opAssociateItemTo(prmObj, attTasks);
+            return clsBrockerCrud.opAssociateItemTo(prmObj, attTasksProject);
         }
 
         private bool opDisassociateProject(clsProject prmObj)
@@ -383,14 +411,15 @@ return true;
 
         private bool opDisassociateTask(clsTask prmObj)
         {
-            return clsBrockerCrud.opDisassociateItemFrom(prmObj, attTasks);
+            return clsBrockerCrud.opDisassociateItemFrom(prmObj, attTasksProject);
         }
+
         public clsProject opGetProject(int prmOUID, string prmName)
         {
             if(prmOUID != 0)
                 return clsBrockerCrud.opGetItem(prmOUID, attProjects);
             else
-               return clsBrockerCrud.opGetItemByName(prmName, attProjects); 
+                return clsBrockerCrud.opGetItemByName(prmName, attProjects); 
         }
 
         public clsStakeholder opGetStakeholder(int prmOUID, string prmEmail)
@@ -398,107 +427,44 @@ return true;
             if(prmOUID != 0)
                 return clsBrockerCrud.opGetItem(prmOUID, attStakeholders);
             else
-               return clsBrockerCrud.opGetItemByEmail(prmEmail, attStakeholders); 
-
+                return clsBrockerCrud.opGetItemByEmail(prmEmail, attStakeholders); 
         }
         
 
-        public clsTask opGetTask(int prmOUID , string prmName)
+        public clsTask opGetTask(int prmOUID, string prmName)
         {
             if(prmOUID != 0)
-                return clsBrockerCrud.opGetItem(prmOUID, attTasks);
+                return clsBrockerCrud.opGetItem(prmOUID, attTasksProject);
             else
-                return clsBrockerCrud.opGetItemByName(prmName, attTasks);
+                return clsBrockerCrud.opGetItemByName(prmName, attTasksProject);
         }
         // =========================================================================
-// MÉTODOS PARA EJECUTAR PROCESOS DE NEGOCIO ANALÍTICOS (PL/SQL VIA DBMS_OUTPUT)
-// =========================================================================
+        // REPORTES ANALÍTICOS (antes PL/SQL vía DBMS_OUTPUT, ahora consultas SQLite)
+        // =========================================================================
 
-public List<string> opGetReporteListarProyectos()
-{
-    return EjecutarBloqueConDbmsOutput("BEGIN PKG_PROYECTO.LISTAR_PROYECTOS; END;");
-}
-
-public List<string> opGetReporteConteoReportes()
-{
-    return EjecutarBloqueConDbmsOutput("BEGIN PKG_PROYECTO.CONTAR_REPORTES_POR_PROYECTO; END;");
-}
-
-public List<string> opGetReportePromedioAvance()
-{
-    return EjecutarBloqueConDbmsOutput("BEGIN PKG_PROYECTO.LISTAR_PROMEDIO_AVANCE_POR_ESTADO; END;");
-}
-
-// =========================================================================
-// MÉTODO INTERNO PARA LEER EL BÚFER DE TEXTO DE ORACLE
-// =========================================================================
-private List<string> EjecutarBloqueConDbmsOutput(string bloqueAnonimo)
-{
-    var lineas = new List<string>();
-
-    // Usamos el método nativo de tu proyecto para obtener la conexión abierta
-    using (OracleConnection vrmConn = clsOracleConnection.opGetConnection())
-    {
-        try
+        public List<string> opGetReporteListarProyectos()
         {
-            vrmConn.Open();
-
-            // 1. Habilitar el búfer de salida de texto en la sesión de Oracle
-            using (OracleCommand cmdEnable = new OracleCommand("BEGIN DBMS_OUTPUT.ENABLE(NULL); END;", vrmConn))
-            {
-                cmdEnable.ExecuteNonQuery();
-            }
-
-            // 2. Ejecutar la lógica de negocio del paquete (los PUT_LINE)
-            using (OracleCommand cmdExec = new OracleCommand(bloqueAnonimo, vrmConn))
-            {
-                cmdExec.ExecuteNonQuery();
-            }
-
-            // 3. Bloque anónimo auxiliar para extraer de golpe las líneas del búfer usando un delimitador
-            string scriptGetLines = @"
-                DECLARE
-                    l_line VARCHAR2(255);
-                    l_status INTEGER;
-                BEGIN
-                    LOOP
-                        DBMS_OUTPUT.GET_LINE(l_line, l_status);
-                        EXIT WHEN l_status <> 0;
-                        :lineasOut := :lineasOut || l_line || '~';
-                    END LOOP;
-                END;";
-
-            using (OracleCommand cmdGetLines = new OracleCommand(scriptGetLines, vrmConn))
-            {
-                OracleParameter paramOut = new OracleParameter("lineasOut", OracleDbType.Varchar2, 32767)
-                {
-                    Direction = ParameterDirection.Output,
-                    Value = ""
-                };
-                cmdGetLines.Parameters.Add(paramOut);
-                cmdGetLines.ExecuteNonQuery();
-
-                string resultadoRaw = paramOut.Value?.ToString() ?? "";
-                if (!string.IsNullOrEmpty(resultadoRaw) && resultadoRaw != "null")
-                {
-                    // Separamos las líneas usando nuestro separador '~'
-                    lineas = new List<string>(resultadoRaw.Split('~', StringSplitOptions.RemoveEmptyEntries));
-                }
-            }
+            return clsProjectData.opReporteListarProyectos();
         }
-        catch (Exception ex)
+
+        public List<string> opGetReporteConteoReportes()
         {
-            lineas.Add("❌ Error en la base de datos Oracle: " + ex.Message);
+            return opSinSalidaVacia(clsProjectData.opReporteConteoReportes());
         }
-    }
 
-    if (lineas.Count == 0)
-    {
-        lineas.Add("ℹ️ El procedimiento se ejecutó correctamente pero no generó salidas de texto.");
-    }
+        public List<string> opGetReportePromedioAvance()
+        {
+            return clsProjectData.opReportePromedioAvance();
+        }
 
-    return lineas;
-}
+        private List<string> opSinSalidaVacia(List<string> prmLineas)
+        {
+            if (prmLineas.Count == 0)
+            {
+                prmLineas.Add("ℹ️ El procedimiento se ejecutó correctamente pero no generó salidas de texto.");
+            }
+            return prmLineas;
+        }
         
     }
 }

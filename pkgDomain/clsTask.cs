@@ -21,6 +21,19 @@ namespace GestionDeProyectos.pkgDomain
          attLimitDate = prmLimitDate;
          attState = prmState;
         }
+
+      public DateTime opGetFirstDate()
+      {
+         return attFirstDate;
+      }
+      public DateTime opGetLimitDate()
+      {
+         return attLimitDate;
+      }
+      public clsState opGetState()
+      {
+         return attState;
+      }
       public bool opModify(
             string prmName,
             string prmDescription,
@@ -36,11 +49,12 @@ namespace GestionDeProyectos.pkgDomain
 
             return true;
       }
-        public override bool opDie()
-        {
-            
-            return true;
-        }
+      public bool opModifyState(clsState prmState)
+      {
+         attState = prmState;
+
+         return true;
+      }
 
     }
 }
