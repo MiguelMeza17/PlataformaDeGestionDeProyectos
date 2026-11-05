@@ -457,6 +457,11 @@ namespace GestionDeProyectos.pkgUI
             return clsProjectData.opReportePromedioAvance();
         }
 
+        public string opGetAlertasProlog()
+        {
+            return clsPrologEngine.opConsultarAlertas();
+        }
+
         private List<string> opSinSalidaVacia(List<string> prmLineas)
         {
             if (prmLineas.Count == 0)

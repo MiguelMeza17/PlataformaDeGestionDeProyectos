@@ -266,6 +266,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==============================================================================
+    // 🌟 ALERTAS INTELIGENTES: REGLAS DE pkgProlog
+    // ==============================================================================
+    function agregarGrupoAlertas(consola, titulo, lineas) {
+        const encabezado = document.createElement("strong");
+        encabezado.textContent = `${titulo} (${lineas.length})`;
+        consola.appendChild(encabezado);
+
+        // textContent y no innerHTML: los nombres los escriben los usuarios
+        const lista = document.createElement("div");
+        lista.style.marginBottom = "12px";
+        lista.textContent = lineas.length > 0 ? lineas.map(l => `• ${l}`).join("\n") : "Sin alertas.";
+        consola.appendChild(lista);
+    }
+
+    const btnAlertasProlog = document.getElementById("btnAlertasProlog");
+    if (btnAlertasProlog) {
+        btnAlertasProlog.addEventListener("click", async () => {
+            const consola = document.getElementById("consolaProlog");
+            consola.textContent = "⚡ Consultando las reglas de Prolog...";
+
+            try {
+                const respuesta = await fetch(`${URL_BASE}/prolog/alertas`);
+                if (!respuesta.ok) {
+                    const problema = await respuesta.json().catch(() => null);
+                    throw new Error(problema?.detail || `HTTP Error: ${respuesta.status}`);
+                }
+                const alertas = await respuesta.json();
+
+                consola.textContent = `Análisis del ${alertas.fecha}\n\n`;
+
+                agregarGrupoAlertas(consola, "⏰ Tareas atrasadas", alertas.atrasadas.map(t =>
+                    `${t.nombre} (${t.proyecto}) - ${t.responsable} - ${t.diasAtraso} días de atraso`
+                ));
+                agregarGrupoAlertas(consola, "🔥 Personas sobrecargadas", alertas.sobrecargados.map(u =>
+                    `${u.nombre} - ${u.tareasActivas} tareas activas`
+                ));
+                agregarGrupoAlertas(consola, "⚠️ Proyectos en riesgo", alertas.proyectosEnRiesgo.map(p =>
+                    `${p.nombre} - ${p.motivos.join("; ")}`
+                ));
+            } catch (error) {
+                consola.textContent = "❌ Error al consultar Prolog: " + error.message;
+                console.error(error);
+            }
+        });
+    }
+
+    // ==============================================================================
     // 🌟 CONTROLADOR 4: LISTAR PROYECTOS Y ACTUALIZAR GRÁFICA EN TIEMPO REAL
     // ==============================================================================
     async function cargarProyectosYGrafica() {

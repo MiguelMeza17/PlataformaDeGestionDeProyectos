@@ -3,10 +3,11 @@
     "GestionDeProyectos": {
       "commandName": "Project",
       "launchBrowser": true,
+      "launchUrl": "pkgUI/InterfaceAdmin/admin.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:57980;http://localhost:57981"
+      "applicationUrl": "http://localhost:5000"
     }
   }
 }

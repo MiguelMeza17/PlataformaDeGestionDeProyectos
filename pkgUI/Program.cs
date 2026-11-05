@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -277,6 +278,18 @@ app.MapGet("/api/reportes/promedio", () => {
         return Results.Problem("Error al generar reporte de promedios: " + ex.Message);
     }
 });
+app.MapGet("/api/prolog/alertas", () => {
+    try
+    {
+        var vrmController = clsController.opGetInstance();
+        return Results.Content(vrmController.opGetAlertasProlog(), "application/json", Encoding.UTF8);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error al consultar Prolog: " + ex.Message);
+    }
+});
+
 app.MapPost("/api/reportes/crear", (clsCrearReporteDTO prmDatos) =>
 {
     try

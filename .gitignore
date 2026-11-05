@@ -5,3 +5,6 @@ obj/
 # Omitir caché de Visual Studio / VS Code
 *.lscache
 .vs/
+
+# Hechos generados desde SQLite en cada consulta
+pkgProlog/hechos.pl
