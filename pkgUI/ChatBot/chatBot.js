@@ -168,6 +168,54 @@ document.addEventListener("DOMContentLoaded", () => {
             ]
         },
         {
+            tag: "consultar_atrasadas",
+            patterns: [
+                "qué tareas están atrasadas",
+                "cuáles tareas están retrasadas",
+                "hay tareas atrasadas",
+                "tengo tareas atrasadas",
+                "muéstrame las tareas vencidas",
+                "cuántas tareas van tarde",
+                "lista de tareas retrasadas",
+                "qué tarea está más atrasada",
+                "qué está atrasado",
+                "tareas vencidas"
+            ]
+        },
+
+        {
+            tag: "consultar_sobrecarga",
+            patterns: [
+                "quién está sobrecargado",
+                "hay alguien con sobrecarga",
+                "tengo sobrecarga de trabajo",
+                "quién tiene demasiadas tareas",
+                "quién tiene más carga de trabajo",
+                "cómo está la carga del equipo",
+                "alguien está saturado",
+                "personas sobrecargadas",
+                "estoy sobrecargado",
+                "revisa la carga de trabajo"
+            ]
+        },
+
+        {
+            tag: "consultar_riesgo",
+            patterns: [
+                "qué proyectos están en riesgo",
+                "hay proyectos en riesgo",
+                "cuáles proyectos están en peligro",
+                "algún proyecto está en riesgo",
+                "qué proyecto corre riesgo",
+                "proyectos en peligro",
+                "lista de proyectos en riesgo",
+                "cuántos proyectos tienen riesgo",
+                "proyectos con problemas",
+                "riesgo de los proyectos"
+            ]
+        },
+
+        {
             tag: "cambiar_estado_tarea",
             patterns: [
                 "cambia el estado de la tarea",
@@ -317,6 +365,90 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    const urlAlertasProlog = "http://localhost:5000/api/prolog/alertas";
+    const intentsProlog = ["consultar_atrasadas", "consultar_sobrecarga", "consultar_riesgo"];
+    const umbralConfianza = 0.6;
+
+    function crearRespuestaProlog(intent, alertas) {
+
+        // Solo cambia lo que se muestra: el endpoint sigue devolviendo las alertas de todos
+        const esDesarrollador = window.location.pathname.includes("InterfaceDeveloper");
+        const idUsuario = Number(localStorage.getItem("idUsuario"));
+
+        if (intent === "consultar_atrasadas") {
+
+            const tareas = esDesarrollador
+                ? alertas.atrasadas.filter(tarea => tarea.responsableId === idUsuario)
+                : alertas.atrasadas;
+
+            if (tareas.length === 0) {
+                return esDesarrollador ? "No tienes tareas atrasadas." : "No hay tareas atrasadas.";
+            }
+
+            const verbo = esDesarrollador ? "Tienes" : "Hay";
+            const cantidad = tareas.length === 1 ? "1 tarea atrasada" : tareas.length + " tareas atrasadas";
+
+            // Prolog las devuelve ordenadas de mayor a menor atraso
+            return `${verbo} ${cantidad}. La más grave es ${tareas[0].nombre}, con ${tareas[0].diasAtraso} días de atraso.`;
+        }
+
+        if (intent === "consultar_sobrecarga") {
+
+            if (esDesarrollador) {
+
+                const propia = alertas.sobrecargados.find(persona => persona.id === idUsuario);
+
+                return propia
+                    ? `Tienes sobrecarga: ${propia.tareasActivas} tareas activas.`
+                    : "No tienes sobrecarga de tareas.";
+            }
+
+            if (alertas.sobrecargados.length === 0) {
+                return "Nadie tiene sobrecarga de tareas.";
+            }
+
+            const personas = alertas.sobrecargados.map(persona => `${persona.nombre} (${persona.tareasActivas} tareas activas)`);
+
+            return `Con sobrecarga: ${personas.join(", ")}.`;
+        }
+
+        const proyectos = alertas.proyectosEnRiesgo.map(proyecto => proyecto.nombre);
+
+        if (proyectos.length === 0) {
+            return "No hay proyectos en riesgo.";
+        }
+
+        const cantidad = proyectos.length === 1 ? "1 proyecto" : proyectos.length + " proyectos";
+
+        return `Hay ${cantidad} en riesgo: ${proyectos.join(", ")}.`;
+    }
+
+    async function responderConProlog(intent) {
+
+        try {
+
+            const respuesta = await fetch(urlAlertasProlog);
+
+            if (!respuesta.ok) {
+                throw new Error("HTTP " + respuesta.status);
+            }
+
+            return {
+                texto: crearRespuestaProlog(intent, await respuesta.json()),
+                imagen: imagenSeria
+            };
+        }
+        catch (error) {
+
+            console.error("Error al consultar Prolog:", error);
+
+            return {
+                texto: "No pude consultar las alertas en este momento.",
+                imagen: imagenSeria
+            };
+        }
+    }
+
     async function getEsdeathResponse(userInput) {
 
         if (!modeloEntrenado) {
@@ -341,7 +473,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const intent = intents[indice].tag;
 
-        console.log("Intent detectado:", intent);
+        console.log("Intent detectado:", intent, mayor);
+
+        // Sin esto, cualquier frase desconocida caería en la intención más parecida
+        if (mayor < umbralConfianza || vector.every(valor => valor === 0)) {
+
+            return {
+                texto: "No entendí completamente tu mensaje. ¿Puedes explicarlo de otra forma?",
+                imagen: imagenPensando
+            };
+        }
+
+        if (intentsProlog.includes(intent)) {
+            return responderConProlog(intent);
+        }
 
         if (intent === "saludo") {
 
