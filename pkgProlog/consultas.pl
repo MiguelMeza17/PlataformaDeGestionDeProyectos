@@ -29,6 +29,7 @@ alerta_atrasada(_{ id: T,
                    nombre: Nombre,
                    proyecto: Proyecto,
                    responsable: Responsable,
+                   responsableId: U,
                    fechaLimite: Limite,
                    diasAtraso: Dias }) :-
     dias_atraso(T, Dias),
