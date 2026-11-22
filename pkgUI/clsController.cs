@@ -462,6 +462,16 @@ namespace GestionDeProyectos.pkgUI
             return clsPrologEngine.opConsultarAlertas();
         }
 
+        public string opGetSugerenciasProlog()
+        {
+            return clsPrologEngine.opConsultarSugerencias();
+        }
+
+        public string opPreguntarProlog(string prmPregunta, int prmIdUsuario, string prmVista)
+        {
+            return clsPrologEngine.opPreguntar(prmPregunta, prmIdUsuario, prmVista);
+        }
+
         private List<string> opSinSalidaVacia(List<string> prmLineas)
         {
             if (prmLineas.Count == 0)

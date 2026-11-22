@@ -10,6 +10,7 @@
         <div class="tabs-nav">
             <button class="tab-button active" onclick="switchTab(event, 'tab-tareas')">📋 Generar Nueva Tarea</button>
             <button class="tab-button" onclick="switchTab(event, 'tab-usuarios')">👥 Modificar Usuarios</button>
+            <button class="tab-button" onclick="switchTab(event, 'tab-prolog')">🧠 Alertas Prolog</button>
         </div>
 
         <div id="tab-tareas" class="tab-content active">
@@ -42,6 +43,8 @@
                     <select id="idUsuarioDesarrolla" required>
                         <option value="" disabled selected>Seleccione un desarrollador...</option>
                     </select>
+                    <button type="button" id="btnSugerirProlog" class="btn-secondary">🧠 Sugerir con Prolog</button>
+                    <p id="sugerenciaProlog"></p>
                 </div>
 
                 <button type="submit" class="btn-send">🚀 Enviar a "Por Desarrollar"</button>
@@ -73,8 +76,17 @@
                 <button type="submit" id="btnGuardarUsuario" class="btn-save" disabled>💾 Guardar Cambios</button>
             </form>
         </div>
+
+        <div id="tab-prolog" class="tab-content">
+            <h2>🧠 Alertas Prolog</h2>
+            <p>Tareas atrasadas y bloqueadas, personas sobrecargadas y proyectos en riesgo, según las reglas de pkgProlog</p>
+
+            <button type="button" id="btnAlertasProlog" class="btn-send">🧠 Analizar con Prolog</button>
+            <div id="consolaProlog" style="margin-top: 15px; padding: 10px; background: #050a12; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #d2b4de; min-height: 120px; white-space: pre-wrap; overflow-y: auto; max-height: 400px; border: 1px solid rgba(142, 68, 173, 0.3);">Esperando orden...</div>
+        </div>
     </div>
 
+    <script src="../Prolog/alertasProlog.js"></script>
     <script src="leader.js"></script>
     
     <link rel="stylesheet" href="../ChatBot/chatbot.css">

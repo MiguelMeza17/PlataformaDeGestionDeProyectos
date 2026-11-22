@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 #nullable disable
@@ -21,8 +22,32 @@ namespace GestionDeProyectos.pkgData
         // Todas las peticiones comparten hechos.pl: una no debe reescribirlo mientras otra lo lee
         private static readonly object attLock = new object();
 
-        // Regenera los hechos desde SQLite, ejecuta las reglas y devuelve el JSON que imprime Prolog
         public static string opConsultarAlertas()
+        {
+            return opConsultar("alertas_json", null);
+        }
+
+        public static string opConsultarSugerencias()
+        {
+            return opConsultar("sugerencias_json", null);
+        }
+
+        // La pregunta viaja como JSON por la entrada estándar, nunca como código Prolog:
+        // así el texto del usuario no puede ejecutar nada en swipl.
+        public static string opPreguntar(string prmPregunta, int prmIdUsuario, string prmVista)
+        {
+            string vrmEntrada = JsonSerializer.Serialize(new
+            {
+                pregunta = prmPregunta,
+                idUsuario = prmIdUsuario,
+                vista = prmVista
+            });
+
+            return opConsultar("preguntar_json", vrmEntrada);
+        }
+
+        // Regenera los hechos desde SQLite, ejecuta el objetivo de consultas.pl y devuelve el JSON que imprime
+        private static string opConsultar(string prmObjetivo, string prmEntrada)
         {
             lock (attLock)
             {
@@ -30,24 +55,27 @@ namespace GestionDeProyectos.pkgData
 
                 clsPrologData.opGenerarHechos(Path.Combine(vrmCarpeta, attFactsFile));
 
-                return opEjecutarSwipl(vrmCarpeta);
+                return opEjecutarSwipl(vrmCarpeta, prmObjetivo, prmEntrada);
             }
         }
 
-        private static string opEjecutarSwipl(string prmCarpeta)
+        private static string opEjecutarSwipl(string prmCarpeta, string prmObjetivo, string prmEntrada)
         {
             ProcessStartInfo vrmInfo = new ProcessStartInfo(opFindSwipl())
             {
                 WorkingDirectory = prmCarpeta,
                 UseShellExecute = false,
                 CreateNoWindow = true,
+                RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
+                // Sin BOM: Prolog lo leería como parte del JSON
+                StandardInputEncoding = new UTF8Encoding(false),
                 StandardOutputEncoding = Encoding.UTF8,
                 StandardErrorEncoding = Encoding.UTF8
             };
 
-            foreach (string vrmArg in new[] { "-q", "--on-error=status", "-g", "main", "-t", "halt", attEntryFile })
+            foreach (string vrmArg in new[] { "-q", "--on-error=status", "-g", prmObjetivo, "-t", "halt", attEntryFile })
             {
                 vrmInfo.ArgumentList.Add(vrmArg);
             }
@@ -59,6 +87,12 @@ namespace GestionDeProyectos.pkgData
                     // Se leen en paralelo para que el proceso no se bloquee si llena una de las dos salidas
                     Task<string> vrmSalida = vrmProceso.StandardOutput.ReadToEndAsync();
                     Task<string> vrmErrores = vrmProceso.StandardError.ReadToEndAsync();
+
+                    if (prmEntrada != null)
+                    {
+                        vrmProceso.StandardInput.Write(prmEntrada);
+                    }
+                    vrmProceso.StandardInput.Close();
 
                     if (!vrmProceso.WaitForExit(attTimeoutMs))
                     {

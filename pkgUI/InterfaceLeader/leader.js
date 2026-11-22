@@ -41,6 +41,32 @@ async function cargarDesarrolladores() {
 document.addEventListener('DOMContentLoaded', () => {
     cargarDesarrolladores();
 
+    const btnSugerirProlog = document.getElementById('btnSugerirProlog');
+    if (btnSugerirProlog) {
+        btnSugerirProlog.addEventListener('click', async () => {
+            const mensaje = document.getElementById('sugerenciaProlog');
+            mensaje.textContent = 'Consultando a Prolog...';
+
+            try {
+                const respuesta = await fetch('http://localhost:5000/api/prolog/sugerir');
+                if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+                const sugerencias = await respuesta.json();
+
+                if (!sugerencias.sugerido) {
+                    mensaje.textContent = 'No hay desarrolladores registrados para sugerir.';
+                    return;
+                }
+
+                const { id, nombre, tareasActivas } = sugerencias.sugerido;
+                document.getElementById('idUsuarioDesarrolla').value = String(id);
+                mensaje.textContent = `Prolog sugiere a ${nombre}: es el desarrollador con menos carga (${tareasActivas} tareas activas).`;
+            } catch (error) {
+                console.error("Error al consultar Prolog:", error);
+                mensaje.textContent = 'No se pudo consultar a Prolog.';
+            }
+        });
+    }
+
     const formulario = document.getElementById('taskForm');
     if (formulario) {
         formulario.addEventListener('submit', async (e) => {

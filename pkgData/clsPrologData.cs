@@ -20,7 +20,7 @@ namespace GestionDeProyectos.pkgData
             vrmHechos.AppendLine("% Archivo generado por clsPrologData. No editar a mano.");
             vrmHechos.AppendLine(":- encoding(utf8).");
             // Sin esto, una tabla vacía haría fallar las reglas por predicado inexistente
-            vrmHechos.AppendLine(":- dynamic proyecto/4, usuario/2, tarea/6.");
+            vrmHechos.AppendLine(":- dynamic proyecto/4, usuario/3, tarea/6, depende_de/2.");
             vrmHechos.AppendLine();
             vrmHechos.AppendLine("hoy(" + opAtomo(clsSqliteConnection.opFormatDate(DateTime.Today)) + ").");
             vrmHechos.AppendLine();
@@ -42,10 +42,14 @@ namespace GestionDeProyectos.pkgData
 
                 opAgregarHechos(
                     vrmConn,
-                    "SELECT ID_USUARIO, NOMBRE FROM USUARIO ORDER BY ID_USUARIO",
+                    @"SELECT U.ID_USUARIO, U.NOMBRE, R.NOMBRE
+                      FROM USUARIO U
+                      JOIN ROL R ON R.ID_ROL = U.ID_ROL
+                      ORDER BY U.ID_USUARIO",
                     vrmReader => "usuario("
                         + vrmReader.GetInt32(0) + ", "
-                        + opAtomo(vrmReader.GetString(1)) + ").",
+                        + opAtomo(vrmReader.GetString(1)) + ", "
+                        + opAtomo(vrmReader.GetString(2)) + ").",
                     vrmHechos
                 );
 
@@ -62,6 +66,15 @@ namespace GestionDeProyectos.pkgData
                         + vrmReader.GetInt32(3) + ", "
                         + opAtomo(vrmReader.GetString(4)) + ", "
                         + opAtomo(vrmReader.GetString(5)) + ").",
+                    vrmHechos
+                );
+
+                opAgregarHechos(
+                    vrmConn,
+                    "SELECT ID_TAREA, ID_TAREA_PREVIA FROM DEPENDENCIA_TAREA ORDER BY ID_TAREA, ID_TAREA_PREVIA",
+                    vrmReader => "depende_de("
+                        + vrmReader.GetInt32(0) + ", "
+                        + vrmReader.GetInt32(1) + ").",
                     vrmHechos
                 );
             }

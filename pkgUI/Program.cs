@@ -290,6 +290,46 @@ app.MapGet("/api/prolog/alertas", () => {
     }
 });
 
+app.MapGet("/api/prolog/sugerir", () => {
+    try
+    {
+        var vrmController = clsController.opGetInstance();
+        return Results.Content(vrmController.opGetSugerenciasProlog(), "application/json", Encoding.UTF8);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error al consultar Prolog: " + ex.Message);
+    }
+});
+
+app.MapPost("/api/prolog/preguntar", (PreguntaPrologDTO prmDatos) => {
+    try
+    {
+        if (prmDatos == null || string.IsNullOrWhiteSpace(prmDatos.pregunta))
+        {
+            return Results.BadRequest(new { mensaje = "La pregunta es requerida." });
+        }
+
+        if (prmDatos.pregunta.Length > 300)
+        {
+            return Results.BadRequest(new { mensaje = "La pregunta no puede superar los 300 caracteres." });
+        }
+
+        string vrmVista = prmDatos.vista == "desarrollador" ? "desarrollador" : "general";
+
+        var vrmController = clsController.opGetInstance();
+        return Results.Content(
+            vrmController.opPreguntarProlog(prmDatos.pregunta, prmDatos.idUsuario, vrmVista),
+            "application/json",
+            Encoding.UTF8
+        );
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("Error al consultar Prolog: " + ex.Message);
+    }
+});
+
 app.MapPost("/api/reportes/crear", (clsCrearReporteDTO prmDatos) =>
 {
     try
@@ -470,3 +510,6 @@ public record DesplegableDeveloperDTO(int id, string nombre);
 
 // NUEVO DTO: Asegura que el JSON entrante se capture automáticamente
 public record EstadoTareaDTO(int nuevoEstado);
+
+// vista: "desarrollador" limita las respuestas a las tareas de idUsuario; cualquier otro valor es "general"
+public record PreguntaPrologDTO(string pregunta, int idUsuario, string vista);
