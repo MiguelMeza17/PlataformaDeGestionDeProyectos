@@ -15,7 +15,7 @@ const MAPEO_ESTADO_STRING = {
 document.addEventListener('DOMContentLoaded', () => {
     if (!desarrolladorId) {
         alert("⚠️ No se encontró una sesión activa de desarrollador. Por favor, inicia sesión.");
-        window.location.href = "/login.html";
+        window.location.href = "/";
         return;
     }
     

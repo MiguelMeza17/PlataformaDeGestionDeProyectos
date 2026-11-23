@@ -39,8 +39,20 @@ string rutaPkgUI = Path.Combine(proyectoRaiz, "pkgUI");
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(rutaPkgUI),
-    RequestPath = "/pkgUI" 
+    RequestPath = "/pkgUI"
 });
+
+// Las imágenes (logo e imágenes de Esdeath) están en la raíz del proyecto, fuera de pkgUI
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(proyectoRaiz, "Imagenes")),
+    RequestPath = "/Imagenes"
+});
+
+// El login también está en la raíz: index.html
+string rutaLogin = Path.Combine(proyectoRaiz, "index.html");
+app.MapGet("/", () => Results.File(rutaLogin, "text/html; charset=utf-8"));
+app.MapGet("/index.html", () => Results.File(rutaLogin, "text/html; charset=utf-8"));
 
 app.MapPost("/api/login", (LoginDTO datos) => {
     try 
